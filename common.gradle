@@ -30,31 +30,39 @@ configurations {
 dependencies {
 	// loom
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	implementation "com.google.code.gson:gson:${project.gson_version}"
-	implementation "com.google.code.findbugs:jsr305:3.0.2"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	modImplementation "eu.pb4:placeholder-api:${project.placeholder_api_version}"
-	modImplementation "me.lucko:fabric-permissions-api:${project.fabric_permissions_api_version}"
-	// modCompileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
+	// compact stuffs
+	implementation "com.google.code.gson:gson:${project.gson_version}"
+	implementation "com.google.code.findbugs:jsr305:3.0.2"
 
 	// runtime mods
 //	if (mcVersion < 11904) {
 //		modRuntimeOnly(mcVersion < 11900 ? "com.github.astei:lazydfu:0.1.2" : "com.github.Fallen-Breath:lazydfu:a7cfc44c0c")
 //	}
 //	// [FEATURE] MIXIN_AUDITOR
-//	modRuntimeOnly 'me.fallenbreath:mixin-auditor:0.1.0'
+	//modRuntimeOnly 'me.fallenbreath:mixin-auditor:0.1.0'
+
+	// modCompileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
 
 	// dependencies
-//	include(modImplementation(fabricApi.module("fabric-resource-loader-v0", project.fabric_api_version)))
-//	include(modImplementation("me.fallenbreath:conditional-mixin-fabric:${project.conditionalmixin_version}"))
-//	include(annotationProcessor(implementation("io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}")))
+	include(modApi(fabricApi.module("fabric-api-base", project.fabric_api_version)))
+	include(modImplementation(fabricApi.module("fabric-resource-loader-v0", project.fabric_api_version)))
+	include(modImplementation(fabricApi.module("fabric-command-api-v${mcVersion >= 11900 ? 2 : 1}", project.fabric_api_version)))
+	if (mcVersion >= 12006) {
+		include(modApi(fabricApi.module("fabric-networking-api-v1", project.fabric_api_version)))
+	}
+	//include(modImplementation("me.fallenbreath:conditional-mixin-fabric:${project.conditionalmixin_version}"))
+	//include(annotationProcessor(implementation("io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}")))
+
+	// Corelib specific
+	modImplementation "eu.pb4:placeholder-api:${project.placeholder_api_version}"
+	modImplementation "me.lucko:fabric-permissions-api:${project.fabric_permissions_api_version}"
 }
 
-String MIXIN_CONFIG_PATH = 'template_mod.mixins.json'
-String LANG_DIR = 'assets/template_mod/lang'
+String MIXIN_CONFIG_PATH = 'corelib.mixins.json'
+String LANG_DIR = 'assets/corelib/lang'
 JavaVersion JAVA_COMPATIBILITY
 if (mcVersion >= 12005) {
 	JAVA_COMPATIBILITY = JavaVersion.VERSION_21
@@ -66,7 +74,6 @@ if (mcVersion >= 12005) {
 	JAVA_COMPATIBILITY = JavaVersion.VERSION_1_8
 }
 JavaVersion MIXIN_COMPATIBILITY_LEVEL = JAVA_COMPATIBILITY
-
 loom {
 	runConfigs.configureEach {
 		// to make sure it generates all "Minecraft Client (:subproject_name)" applications
@@ -74,14 +81,14 @@ loom {
 		runDir '../../run'
 		vmArgs '-Dmixin.debug.export=true'
 	}
-//	// [FEATURE] MIXIN_AUDITOR
-//	runs {
-//		serverMixinAudit {
-//			server()
-//			vmArgs '-DmixinAuditor.audit=true'
-//			ideConfigGenerated false
-//		}
-//	}
+	// [FEATURE] MIXIN_AUDITOR
+	//runs {
+		//serverMixinAudit {
+			//server()
+			//vmArgs '-DmixinAuditor.audit=true'
+			//ideConfigGenerated false
+		//}
+	//}
 }
 
 remapJar {
