@@ -17,6 +17,9 @@ repositories {
 	maven {
 		url 'https://maven.fallenbreath.me/releases'
 	}
+	maven {
+		url 'https://maven.nucleoid.xyz/'
+	}
 }
 
 // https://github.com/FabricMC/fabric-loader/issues/783
@@ -27,8 +30,15 @@ configurations {
 dependencies {
 	// loom
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "com.google.code.gson:gson:${project.gson_version}"
+	implementation "com.google.code.findbugs:jsr305:3.0.2"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	modImplementation "eu.pb4:placeholder-api:${project.placeholder_api_version}"
+	modImplementation "me.lucko:fabric-permissions-api:${project.fabric_permissions_api_version}"
+	// modCompileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
 
 	// runtime mods
 //	if (mcVersion < 11904) {

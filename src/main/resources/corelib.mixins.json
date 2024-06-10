@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.github.sakuraryoko.corelib.mixin",
+  "compatibilityLevel": "{{COMPATIBILITY_LEVEL}}",
+  "mixins": [
+    "MixinMinecraftDedicatedServer",
+    "MixinMinecraftServer",
+    "MixinPlayerManager",
+    "MixinServerWorld"
+  ],
+  "client": [
+    "MixinClientPlayNetworkHandler",
+    "MixinIntegratedServer",
+    "MixinMinecraftClient"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
