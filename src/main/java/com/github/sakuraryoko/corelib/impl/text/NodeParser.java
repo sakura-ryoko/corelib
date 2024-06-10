@@ -18,18 +18,40 @@
  * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.github.sakuraryoko.corelib.api.config;
+package com.github.sakuraryoko.corelib.impl.text;
 
-public interface IConfigDispatch
+//#if MC >= 11902
+//$$ import eu.pb4.placeholders.api.TextParserUtils;
+//#else
+import eu.pb4.placeholders.TextParser;
+//#endif
+import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.text.Text;
+
+@ApiStatus.Internal
+public class NodeParser
 {
-    IConfigData newConfig();
-    IConfigData getConfig();
-    boolean isLoaded();
-    void onPreLoadConfig();
-    void onPostLoadConfig();
-    void onPreSaveConfig();
-    void onPostSaveConfig();
-    IConfigData defaults();
-    IConfigData update(IConfigData data);
-    void execute();
+    public static Text parse(String input)
+    {
+        return parse(input, true);
+    }
+
+    public static Text parse(String input, boolean safe)
+    {
+//#if MC >= 11902
+        //$$ if (safe)
+        //$$ {
+            //$$ return TextParserUtils.formatTextSafe(input);
+        //$$ }
+
+        //$$ return TextParserUtils.formatText(input);
+//#else
+        if (safe)
+        {
+            return TextParser.parseSafe(input);
+        }
+
+        return TextParser.parse(input);
+//#endif
+    }
 }

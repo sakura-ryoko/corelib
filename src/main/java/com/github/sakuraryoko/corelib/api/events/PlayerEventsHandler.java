@@ -1,3 +1,23 @@
+/*
+ * This file is part of the CoreLib project, licensed under the
+ * GNU Lesser General Public License v3.0
+ *
+ * Copyright (C) 2024  Sakura Ryoko and contributors
+ *
+ * CoreLib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * CoreLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.github.sakuraryoko.corelib.api.events;
 
 import javax.annotation.Nullable;
@@ -8,7 +28,9 @@ import com.github.sakuraryoko.corelib.util.CoreLog;
 import org.jetbrains.annotations.ApiStatus;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.server.network.ConnectedClientData;
+//#if MC >= 12006
+//$$ import net.minecraft.server.network.ConnectedClientData;
+//#endif
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
@@ -42,7 +64,11 @@ public class PlayerEventsHandler implements IPlayerEventsManager
         }
         else
         {
-            CoreLog.debug("onConnection: connection from {} // {} --> result: {}", addr.toString(), profile.getId().toString(), result.getLiteralString());
+//#if MC >= 12004
+            //$$ CoreLog.debug("onConnection: connection from {} // {} --> result: {}", addr.toString(), profile.getId().toString(), result.getLiteralString());
+//#else
+            CoreLog.debug("onConnection: connection from {} // {} --> result: {}", addr.toString(), profile.getId().toString(), result.getString());
+//#endif
         }
 
         if (!this.handlers.isEmpty())
@@ -51,21 +77,37 @@ public class PlayerEventsHandler implements IPlayerEventsManager
         }
     }
 
-    @ApiStatus.Internal
-    public void onPlayerJoinPre(ServerPlayerEntity player, ClientConnection clientConnection, ConnectedClientData clientData)
+@ApiStatus.Internal
+//#if MC >= 12006
+    //$$ public void onPlayerJoinPre(ServerPlayerEntity player, ClientConnection clientConnection, ConnectedClientData clientData)
+    //$$ {
+        //$$ CoreLog.debug("onPlayerJoinPre: {} is joining.", player.getName().getLiteralString());
+
+        //$$ if (!this.handlers.isEmpty())
+        //$$ {
+            //$$ this.handlers.forEach((handler) -> handler.onPlayerJoinPre(player, clientConnection, clientData));
+        //$$ }
+    //$$ }
+//#else
+    public void onPlayerJoinPre(ServerPlayerEntity player, ClientConnection clientConnection)
     {
-        CoreLog.debug("onPlayerJoinPre: {} is joining.", player.getName().getLiteralString());
+        CoreLog.debug("onPlayerJoinPre: {} is joining.", player.getName().toString());
 
         if (!this.handlers.isEmpty())
         {
-            this.handlers.forEach((handler) -> handler.onPlayerJoinPre(player, clientConnection, clientData));
+            this.handlers.forEach((handler) -> handler.onPlayerJoinPre(player, clientConnection));
         }
     }
+//#endif
 
     @ApiStatus.Internal
     public void onPlayerJoinPost(ServerPlayerEntity player)
     {
-        CoreLog.debug("onPlayerJoinPost: {} has joined.", player.getName().getLiteralString());
+//#if MC >= 12004
+        //$$ CoreLog.debug("onPlayerJoinPost: {} has joined.", player.getName().getLiteralString());
+//#else
+        CoreLog.debug("onPlayerJoinPost: {} has joined.", player.getName().toString());
+//#endif
 
         if (!this.handlers.isEmpty())
         {
@@ -76,7 +118,11 @@ public class PlayerEventsHandler implements IPlayerEventsManager
     @ApiStatus.Internal
     public void onPlayerRespawn(ServerPlayerEntity player)
     {
-        CoreLog.debug("onPlayerRespawn: {} has respawned.", player.getName().getLiteralString());
+//#if MC >= 12004
+        //$$ CoreLog.debug("onPlayerRespawn: {} has respawned.", player.getName().getLiteralString());
+//#else
+        CoreLog.debug("onPlayerRespawn: {} has respawned.", player.getName().toString());
+//#endif
 
         if (!this.handlers.isEmpty())
         {
@@ -87,7 +133,11 @@ public class PlayerEventsHandler implements IPlayerEventsManager
     @ApiStatus.Internal
     public void onPlayerLeave(ServerPlayerEntity player)
     {
-        CoreLog.debug("onPlayerLeave: {} has left.", player.getName().getLiteralString());
+//#if MC >= 12004
+        //$$ CoreLog.debug("onPlayerLeave: {} has left.", player.getName().getLiteralString());
+//#else
+        CoreLog.debug("onPlayerLeave: {} has left.", player.getName().getString());
+//#endif
 
         if (!this.handlers.isEmpty())
         {

@@ -204,7 +204,7 @@ license {
 	}
 	ext {
 		name = project.mod_name
-		author = 'Fallen_Breath'
+		author = 'Sakura Ryoko'
 		year = Calendar.getInstance().get(Calendar.YEAR).toString()
 	}
 }

@@ -1,8 +1,33 @@
+/*
+ * This file is part of the CoreLib project, licensed under the
+ * GNU Lesser General Public License v3.0
+ *
+ * Copyright (C) 2024  Sakura Ryoko and contributors
+ *
+ * CoreLib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * CoreLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.github.sakuraryoko.corelib.impl.commands;
 
 import com.github.sakuraryoko.corelib.impl.network.TestSuite;
 import com.github.sakuraryoko.corelib.util.CoreLog;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+//#if MC >= 11902
+//$$ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+//#else
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+//#endif
+
 import org.jetbrains.annotations.ApiStatus;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -19,7 +44,11 @@ public class TestCommand
 {
     public static void register()
     {
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
+    //#if MC >= 11902
+        //$$ CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
+    //#else
+        CommandRegistrationCallback.EVENT.register((dispatcher, environment) -> dispatcher.register(
+    //#endif
                 literal("network-test")
                         .then(literal("client")
                                 .then(argument("player", EntityArgumentType.player())
@@ -37,7 +66,11 @@ public class TestCommand
 
     private static int testPlayer(ServerCommandSource src, ServerPlayerEntity target, String message, CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException
     {
-        String user = src.getPlayerOrThrow().getName().getLiteralString();
+        //#if MC >= 12004
+        //$$ String user = src.getPlayerOrThrow().getName().getLiteralString();
+        //#else
+        String user = src.getName();
+        //#endif
         String reponse = !message.isEmpty() ? message : "random message";
         if (target != null)
         {
@@ -51,7 +84,11 @@ public class TestCommand
     }
     private static int testServer(ServerCommandSource src, CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException
     {
-        String user = src.getPlayerOrThrow().getName().getLiteralString();
+        //#if MC >= 12004
+        //$$ String user = src.getPlayerOrThrow().getName().getLiteralString();
+        //#else
+        String user = src.getName();
+        //#endif
         // Run C2S test
         TestSuite.testC2S("Random server message");
 

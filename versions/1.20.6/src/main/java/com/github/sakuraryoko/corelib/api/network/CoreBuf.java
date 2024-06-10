@@ -18,18 +18,20 @@
  * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.github.sakuraryoko.corelib.api.config;
+package com.github.sakuraryoko.corelib.api.network;
 
-public interface IConfigDispatch
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.PacketByteBuf;
+
+/**
+ * This can be used as a replacement for your "PacketByteBuf" type of CustomPayloads,
+ * And can be used to try to (re)-implement some of your old IPluginChannelHandler based
+ * protocols, if needed; but generally using an NbtCompound Payload is simple enough.
+ */
+public class CoreBuf extends PacketByteBuf
 {
-    IConfigData newConfig();
-    IConfigData getConfig();
-    boolean isLoaded();
-    void onPreLoadConfig();
-    void onPostLoadConfig();
-    void onPreSaveConfig();
-    void onPostSaveConfig();
-    IConfigData defaults();
-    IConfigData update(IConfigData data);
-    void execute();
+    public CoreBuf(ByteBuf parent)
+    {
+        super(parent);
+    }
 }

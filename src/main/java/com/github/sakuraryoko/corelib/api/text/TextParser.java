@@ -1,7 +1,27 @@
+/*
+ * This file is part of the CoreLib project, licensed under the
+ * GNU Lesser General Public License v3.0
+ *
+ * Copyright (C) 2024  Sakura Ryoko and contributors
+ *
+ * CoreLib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * CoreLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.github.sakuraryoko.corelib.api.text;
 
-import com.github.sakuraryoko.corelib.impl.text.NodeParserV1;
-import com.github.sakuraryoko.corelib.impl.text.PlaceholderParserV1;
+import com.github.sakuraryoko.corelib.impl.text.NodeParser;
+import com.github.sakuraryoko.corelib.impl.text.PlaceholderParser;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -35,31 +55,31 @@ public class TextParser
 
     public Text parseNodes(String input)
     {
-        return NodeParserV1.parse(input, true);
+        return NodeParser.parse(input, true);
     }
 
     public Text parseNodes(String input, boolean safe)
     {
-        return NodeParserV1.parse(input, safe);
+        return NodeParser.parse(input, safe);
     }
 
     public Text parsePlaceholders(Text input, ServerCommandSource src)
     {
-        return PlaceholderParserV1.parseTextCmdSrc(input, src);
+        return PlaceholderParser.parseTextCmdSrc(input, src);
     }
 
     public Text parsePlaceholders(Text input, ServerPlayerEntity src)
     {
-        return PlaceholderParserV1.parseTextPlayer(input, src);
+        return PlaceholderParser.parseTextPlayer(input, src);
     }
 
     public Text parsePlaceholders(Text input, MinecraftServer src)
     {
-        return PlaceholderParserV1.parseTextServer(input, src);
+        return PlaceholderParser.parseTextServer(input, src);
     }
 
     public Text parsePlaceholders(Text input, Entity src)
     {
-        return PlaceholderParserV1.parseTextEntity(input, src);
+        return PlaceholderParser.parseTextEntity(input, src);
     }
 }

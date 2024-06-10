@@ -1,3 +1,23 @@
+/*
+ * This file is part of the CoreLib project, licensed under the
+ * GNU Lesser General Public License v3.0
+ *
+ * Copyright (C) 2024  Sakura Ryoko and contributors
+ *
+ * CoreLib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * CoreLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.github.sakuraryoko.corelib.mixin;
 
 import com.github.sakuraryoko.corelib.api.events.ClientEventsHandler;
@@ -11,7 +31,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
-import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
+//#if MC >= 12006
+//$$ import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
+//#endif
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -35,7 +57,11 @@ public abstract class MixinMinecraftClient
     }
 
     @Inject(method ="joinWorld", at = @At("HEAD"))
-    private void corelib$onJoinWorldPre(ClientWorld world, DownloadingTerrainScreen.WorldEntryReason worldEntryReason, CallbackInfo ci)
+    //#if MC >= 12006
+    //$$ private void corelib$onJoinWorldPre(ClientWorld world, DownloadingTerrainScreen.WorldEntryReason worldEntryReason, CallbackInfo ci)
+    //#else
+    private void corelib$onJoinWorldPre(ClientWorld world, CallbackInfo ci)
+    //#endif
     {
         if (this.world == null)
         {
@@ -50,7 +76,11 @@ public abstract class MixinMinecraftClient
     }
 
     @Inject(method ="joinWorld", at = @At("TAIL"))
-    private void corelib$onJoinWorldPost(ClientWorld world, DownloadingTerrainScreen.WorldEntryReason worldEntryReason, CallbackInfo ci)
+    //#if MC >= 12006
+    //$$ private void corelib$onJoinWorldPost(ClientWorld world, DownloadingTerrainScreen.WorldEntryReason worldEntryReason, CallbackInfo ci)
+    //#else
+    private void corelib$onJoinWorldPost(ClientWorld world, CallbackInfo ci)
+    //#endif
     {
         if (this.lastWorld != null)
         {
@@ -69,7 +99,11 @@ public abstract class MixinMinecraftClient
         this.lastWorld = world;
     }
 
-    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;Z)V", at = @At("HEAD"))
+    //#if MC >= 12006
+    //$$ @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;Z)V", at = @At("HEAD"))
+    //#else
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("HEAD"))
+    //#endif
     private void corelib$disconnectPre(CallbackInfo ci)
     {
         if (this.lastWorld == null)
@@ -84,8 +118,13 @@ public abstract class MixinMinecraftClient
         }
     }
 
-    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;Z)V", at = @At("RETURN"))
-    private void corelib$disconnectPost(Screen disconnectionScreen, boolean transferring, CallbackInfo ci)
+    //#if MC >= 12006
+    //$$ @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;Z)V", at = @At("RETURN"))
+    //$$ private void corelib$disconnectPost(Screen disconnectionScreen, boolean transferring, CallbackInfo ci)
+    //#else
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("RETURN"))
+    private void corelib$disconnectPost(Screen screen, CallbackInfo ci)
+    //#endif
     {
         if (this.lastWorld != null)
         {
@@ -99,7 +138,12 @@ public abstract class MixinMinecraftClient
         }
     }
 
-    @Inject(method = "onDisconnected", at = @At("HEAD"))
+    //#if MC >= 12006
+    //$$ @Inject(method = "onDisconnected", at = @At("HEAD"))
+    //#else
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;clearWorld()V"))
+    //#endif
     private void corelib$onDisconnected(CallbackInfo ci)
     {
         ((ClientEventsHandler) ClientEventsHandler.getInstance()).onCloseConnection(null);

@@ -1,10 +1,30 @@
+/*
+ * This file is part of the CoreLib project, licensed under the
+ * GNU Lesser General Public License v3.0
+ *
+ * Copyright (C) 2024  Sakura Ryoko and contributors
+ *
+ * CoreLib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * CoreLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.github.sakuraryoko.corelib.api.init;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import com.github.sakuraryoko.corelib.impl.text.NodeParserV1;
+import com.github.sakuraryoko.corelib.impl.text.NodeParser;
 import com.github.sakuraryoko.corelib.util.CoreLog;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
@@ -47,7 +67,11 @@ public class ModInitData
         if (modID.isEmpty())
             return;
 
-        this.mcVersion = MinecraftVersion.CURRENT.getName();
+        //#if MC >= 11902
+        //$$ this.mcVersion = MinecraftVersion.CURRENT.getName();
+        //#else
+        this.mcVersion = MinecraftVersion.GAME_VERSION.getName();
+        //#endif
         this.instance = FabricLoader.getInstance();
         this.MOD_ID = modID;
         this.envType = this.instance.getEnvironmentType();
@@ -209,13 +233,13 @@ public class ModInitData
         Map <String, Text> fmtInfo = new HashMap<>();
 
         fmtInfo.put("ver",  Text.of(this.modName+"-"+this.mcVersion+"-"+this.modVersion));
-        fmtInfo.put("auth", NodeParserV1.parse("Author: <pink>"+this.authorString+"</pink>"));
-        fmtInfo.put("con",  NodeParserV1.parse("Contrib: <lime>"+this.contribString+"</lime>"));
-        fmtInfo.put("lic",  NodeParserV1.parse("License: <yellow>"+this.licenseString+"</yellow>"));
-        fmtInfo.put("home", NodeParserV1.parse("Homepage: <cyan><url:'"+this.homepage+"'>"+this.homepage+"</url></cyan>"));
-        fmtInfo.put("src",  NodeParserV1.parse("Source: <cyan><url:'"+this.source+"'>"+this.source+"</url></cyan>"));
-        fmtInfo.put("iss",  NodeParserV1.parse("Issues: <cyan><url:'"+this.issues+"'>"+this.issues+"</url></cyan>"));
-        fmtInfo.put("desc", NodeParserV1.parse("Description: <light_blue>"+this.description+"</light_blue>"));
+        fmtInfo.put("auth", NodeParser.parse("Author: <pink>"+this.authorString+"</pink>"));
+        fmtInfo.put("con",  NodeParser.parse("Contrib: <lime>"+this.contribString+"</lime>"));
+        fmtInfo.put("lic",  NodeParser.parse("License: <yellow>"+this.licenseString+"</yellow>"));
+        fmtInfo.put("home", NodeParser.parse("Homepage: <cyan><url:'"+this.homepage+"'>"+this.homepage+"</url></cyan>"));
+        fmtInfo.put("src",  NodeParser.parse("Source: <cyan><url:'"+this.source+"'>"+this.source+"</url></cyan>"));
+        fmtInfo.put("iss",  NodeParser.parse("Issues: <cyan><url:'"+this.issues+"'>"+this.issues+"</url></cyan>"));
+        fmtInfo.put("desc", NodeParser.parse("Description: <light_blue>"+this.description+"</light_blue>"));
 
         return fmtInfo;
     }

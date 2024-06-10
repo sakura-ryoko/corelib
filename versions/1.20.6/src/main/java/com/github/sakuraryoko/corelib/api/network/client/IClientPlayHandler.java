@@ -18,18 +18,15 @@
  * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.github.sakuraryoko.corelib.api.config;
+package com.github.sakuraryoko.corelib.api.network.client;
 
-public interface IConfigDispatch
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.network.packet.CustomPayload;
+
+@Environment(EnvType.CLIENT)
+public interface IClientPlayHandler
 {
-    IConfigData newConfig();
-    IConfigData getConfig();
-    boolean isLoaded();
-    void onPreLoadConfig();
-    void onPostLoadConfig();
-    void onPreSaveConfig();
-    void onPostSaveConfig();
-    IConfigData defaults();
-    IConfigData update(IConfigData data);
-    void execute();
+    <P extends CustomPayload> void registerClientPlayHandler(IPluginClientPlayHandler<P> handler);
+    <P extends CustomPayload> void unregisterClientPlayHandler(IPluginClientPlayHandler<P> handler);
 }

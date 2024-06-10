@@ -18,18 +18,12 @@
  * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.github.sakuraryoko.corelib.api.config;
+package com.github.sakuraryoko.corelib.api.network.server;
 
-public interface IConfigDispatch
+import net.minecraft.network.packet.CustomPayload;
+
+public interface IServerPlayHandler
 {
-    IConfigData newConfig();
-    IConfigData getConfig();
-    boolean isLoaded();
-    void onPreLoadConfig();
-    void onPostLoadConfig();
-    void onPreSaveConfig();
-    void onPostSaveConfig();
-    IConfigData defaults();
-    IConfigData update(IConfigData data);
-    void execute();
+    <P extends CustomPayload> void registerServerPlayHandler(IPluginServerPlayHandler<P> handler);
+    <P extends CustomPayload> void unregisterServerPlayHandler(IPluginServerPlayHandler<P> handler);
 }
