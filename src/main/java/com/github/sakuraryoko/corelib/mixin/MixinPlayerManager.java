@@ -38,7 +38,7 @@ import com.mojang.authlib.GameProfile;
 //#endif
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
-//#if MC >= 12006
+//#if MC >= 12002
 //$$ import net.minecraft.server.network.ConnectedClientData;
 //#endif
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -55,7 +55,7 @@ public abstract class MixinPlayerManager
         ((PlayerEventsHandler) PlayerEventsHandler.getInstance()).onConnection(address, profile, cir.getReturnValue());
     }
 
-    //#if MC >= 12006
+    //#if MC >= 12002
     //$$ @Inject(method = "onPlayerConnect", at = @At("HEAD"))
     //$$ private void corelib$onPlayerJoinPre(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci)
     //$$ {
@@ -68,11 +68,6 @@ public abstract class MixinPlayerManager
         //$$ ((PlayerEventsHandler) PlayerEventsHandler.getInstance()).onPlayerJoinPost(player);
     //$$ }
 
-    //$$ @Inject(method = "respawnPlayer", at = @At("RETURN"))
-    //$$ private void corelib$onPlayerRespawn(ServerPlayerEntity player, boolean alive, Entity.RemovalReason removalReason, CallbackInfoReturnable<ServerPlayerEntity> cir)
-    //$$ {
-        //$$ ((PlayerEventsHandler) PlayerEventsHandler.getInstance()).onPlayerRespawn(player);
-    //$$ }
     //#else
     @Inject(method = "onPlayerConnect", at = @At("HEAD"))
     private void corelib$onPlayerJoinPre(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci)
@@ -85,13 +80,22 @@ public abstract class MixinPlayerManager
     {
         ((PlayerEventsHandler) PlayerEventsHandler.getInstance()).onPlayerJoinPost(player);
     }
+    //#endif
 
+    //#if MC >= 12100
+    //$$ @Inject(method = "respawnPlayer", at = @At("RETURN"))
+    //$$ private void corelib$onPlayerRespawn(ServerPlayerEntity player, boolean alive, Entity.RemovalReason removalReason, CallbackInfoReturnable<ServerPlayerEntity> cir)
+    //$$ {
+    //$$ ((PlayerEventsHandler) PlayerEventsHandler.getInstance()).onPlayerRespawn(player);
+    //$$ }
+    //#else
     @Inject(method = "respawnPlayer", at = @At("RETURN"))
     private void corelib$onPlayerRespawn(ServerPlayerEntity player, boolean alive, CallbackInfoReturnable<ServerPlayerEntity> cir)
     {
         ((PlayerEventsHandler) PlayerEventsHandler.getInstance()).onPlayerRespawn(player);
     }
     //#endif
+
     @Inject(method = "remove", at = @At("HEAD"))
     private void corelib$onPlayerLeave(ServerPlayerEntity player, CallbackInfo ci)
     {
@@ -108,9 +112,14 @@ public abstract class MixinPlayerManager
     private void corelib$onSetViewDistance(int viewDistance, CallbackInfo ci)
     {
         ((PlayerEventsHandler) PlayerEventsHandler.getInstance()).onSetViewDistance(viewDistance);
+        // Under 1.17, simulationDistance and viewDistance is basically the same (aka watchDistance)
+        //#if MC >= 11904
+        //#else
+        ((PlayerEventsHandler) PlayerEventsHandler.getInstance()).onSetSimulationDistance(viewDistance);
+        //#endif
     }
 
-    //#if MC >= 11902
+    //#if MC >= 11904
     //$$ @Inject(method = "setSimulationDistance", at = @At("HEAD"))
     //$$ private void corelib$onSetSimulationDistance(int viewDistance, CallbackInfo ci)
     //$$ {

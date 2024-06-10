@@ -25,8 +25,11 @@
 
 package com.github.sakuraryoko.corelib.impl.commands;
 
-import com.github.sakuraryoko.corelib.impl.network.TestSuite;
+//#if MC >= 12006
+//$$ import com.github.sakuraryoko.corelib.impl.network.TestSuite;
+//#endif
 import com.github.sakuraryoko.corelib.util.CoreLog;
+import com.github.sakuraryoko.corelib.util.PlayerNameUtil;
 //#if MC >= 11902
 //$$ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 //#else
@@ -71,12 +74,9 @@ public class TestCommand
 
     private static int testPlayer(ServerCommandSource src, ServerPlayerEntity target, String message, CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException
     {
-        //#if MC >= 12004
-        //$$ String user = src.getPlayerOrThrow().getName().getLiteralString();
-        //#else
-        String user = src.getName();
-        //#endif
+        String user = PlayerNameUtil.getPlayerName(src);
         String reponse = !message.isEmpty() ? message : "random message";
+
         if (target != null)
         {
             // Run S2C test -> Player
@@ -91,11 +91,8 @@ public class TestCommand
     }
     private static int testServer(ServerCommandSource src, CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException
     {
-        //#if MC >= 12004
-        //$$ String user = src.getPlayerOrThrow().getName().getLiteralString();
-        //#else
-        String user = src.getName();
-        //#endif
+        String user = PlayerNameUtil.getPlayerName(src);
+
         // Run C2S test
         //#if MC >= 12006
         //$$ TestSuite.testC2S("Random server message");

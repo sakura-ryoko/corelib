@@ -23,37 +23,29 @@
  * SOFTWARE.
  */
 
-package com.github.sakuraryoko.corelib.api.events;
+package com.github.sakuraryoko.corelib.util;
 
-import javax.annotation.Nullable;
-import java.net.SocketAddress;
-import com.mojang.authlib.GameProfile;
-import net.minecraft.network.ClientConnection;
-//#if MC >= 12002
-//$$ import net.minecraft.server.network.ConnectedClientData;
-//#endif
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 
-public interface IPlayerEventsDispatch
+public class PlayerNameUtil
 {
-    void onConnection(SocketAddress addr, GameProfile profile, @Nullable Text result);
+    public static String getPlayerName(ServerPlayerEntity player)
+    {
+        //#if MC >= 12004
+        //$$ return player.getName().getLiteralString();
+        //#else
+        return player.getName().toString();
+        //#endif
+    }
 
-    //#if MC >= 12002
-    //$$ void onPlayerJoinPre(ServerPlayerEntity player, ClientConnection clientConnection, ConnectedClientData clientData);
-    //#else
-    void onPlayerJoinPre(ServerPlayerEntity player, ClientConnection clientConnection);
-    //#endif
-
-    void onPlayerJoinPost(ServerPlayerEntity player);
-
-    void onPlayerRespawn(ServerPlayerEntity newPlayer);
-
-    void onPlayerLeave(ServerPlayerEntity player);
-
-    void onDisconnectAll();
-
-    void onSetViewDistance(int distance);
-
-    void onSetSimulationDistance(int distance);
+    public static String getPlayerName(ServerCommandSource src) throws CommandSyntaxException
+    {
+        //#if MC >= 12004
+        //$$ return src.getPlayerOrThrow().getName().getLiteralString();
+        //#else
+        return src.getName();
+        //#endif
+    }
 }

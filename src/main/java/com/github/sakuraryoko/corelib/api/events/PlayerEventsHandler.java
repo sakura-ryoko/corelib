@@ -30,10 +30,11 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.sakuraryoko.corelib.util.CoreLog;
+import com.github.sakuraryoko.corelib.util.PlayerNameUtil;
 import org.jetbrains.annotations.ApiStatus;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.ClientConnection;
-//#if MC >= 12006
+//#if MC >= 12002
 //$$ import net.minecraft.server.network.ConnectedClientData;
 //#endif
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -83,36 +84,28 @@ public class PlayerEventsHandler implements IPlayerEventsManager
     }
 
 @ApiStatus.Internal
-//#if MC >= 12006
+//#if MC >= 12002
     //$$ public void onPlayerJoinPre(ServerPlayerEntity player, ClientConnection clientConnection, ConnectedClientData clientData)
-    //$$ {
-        //$$ CoreLog.debug("onPlayerJoinPre: {} is joining.", player.getName().getLiteralString());
-
-        //$$ if (!this.handlers.isEmpty())
-        //$$ {
-            //$$ this.handlers.forEach((handler) -> handler.onPlayerJoinPre(player, clientConnection, clientData));
-        //$$ }
-    //$$ }
 //#else
     public void onPlayerJoinPre(ServerPlayerEntity player, ClientConnection clientConnection)
+//#endif
     {
-        CoreLog.debug("onPlayerJoinPre: {} is joining.", player.getName().toString());
-
+        CoreLog.debug("onPlayerJoinPre: {} is joining.", PlayerNameUtil.getPlayerName(player));
+        
         if (!this.handlers.isEmpty())
         {
+            //#if MC >= 12002
+            //$$ this.handlers.forEach((handler) -> handler.onPlayerJoinPre(player, clientConnection, clientData));
+            //#else
             this.handlers.forEach((handler) -> handler.onPlayerJoinPre(player, clientConnection));
+            //#endif
         }
     }
-//#endif
 
     @ApiStatus.Internal
     public void onPlayerJoinPost(ServerPlayerEntity player)
     {
-//#if MC >= 12004
-        //$$ CoreLog.debug("onPlayerJoinPost: {} has joined.", player.getName().getLiteralString());
-//#else
-        CoreLog.debug("onPlayerJoinPost: {} has joined.", player.getName().toString());
-//#endif
+        CoreLog.debug("onPlayerJoinPost: {} has joined.", PlayerNameUtil.getPlayerName(player));
 
         if (!this.handlers.isEmpty())
         {
@@ -123,11 +116,7 @@ public class PlayerEventsHandler implements IPlayerEventsManager
     @ApiStatus.Internal
     public void onPlayerRespawn(ServerPlayerEntity player)
     {
-//#if MC >= 12004
-        //$$ CoreLog.debug("onPlayerRespawn: {} has respawned.", player.getName().getLiteralString());
-//#else
-        CoreLog.debug("onPlayerRespawn: {} has respawned.", player.getName().toString());
-//#endif
+        CoreLog.debug("onPlayerRespawn: {} has respawned.", PlayerNameUtil.getPlayerName(player));
 
         if (!this.handlers.isEmpty())
         {
@@ -138,11 +127,7 @@ public class PlayerEventsHandler implements IPlayerEventsManager
     @ApiStatus.Internal
     public void onPlayerLeave(ServerPlayerEntity player)
     {
-//#if MC >= 12004
-        //$$ CoreLog.debug("onPlayerLeave: {} has left.", player.getName().getLiteralString());
-//#else
-        CoreLog.debug("onPlayerLeave: {} has left.", player.getName().getString());
-//#endif
+        CoreLog.debug("onPlayerLeave: {} has left.", PlayerNameUtil.getPlayerName(player));
 
         if (!this.handlers.isEmpty())
         {
