@@ -27,7 +27,7 @@
   ],
 
   "depends": {
-    "fabricloader": ">=0.11.4",
+    "fabricloader": ">=0.15.10",
     "minecraft": "${minecraft_dependency}"
   },
   "custom": {

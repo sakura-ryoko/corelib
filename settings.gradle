@@ -7,6 +7,10 @@ pluginManagement {
 			url = 'https://maven.fabricmc.net/'
 		}
 		maven {
+			name = 'Fallen Breath'
+			url 'https://maven.fallenbreath.me/releases'
+		}
+		maven {
 			name = 'Jitpack'
 			url = 'https://jitpack.io'
 		}
