@@ -61,6 +61,24 @@ public class MixinCommands
     //$$ {
         //$$ ((CommandManager) CommandManager.getInstance()).registerCommands(this.dispatcher, commandBuildContext, commandSelection);
     //$$ }
+    //#elseif MC >= 11605
+    //$$ @Inject(method = "<init>",
+            //$$ at = @At(value = "INVOKE",
+                     //$$ target = "Lnet/minecraft/server/commands/WhitelistCommand;register(Lcom/mojang/brigadier/CommandDispatcher;)V",
+                     //$$ shift = At.Shift.AFTER))
+    //$$ private void corelib$injectDedicatedCommands(Commands.CommandSelection commandSelection, CallbackInfo ci)
+    //$$ {
+        //$$ ((CommandManager) CommandManager.getInstance()).registerCommands(this.dispatcher);
+    //$$ }
+
+    //$$ @Inject(method = "<init>",
+            //$$ at = @At(value = "INVOKE",
+                     //$$ target = "Lnet/minecraft/server/commands/PublishCommand;register(Lcom/mojang/brigadier/CommandDispatcher;)V",
+                     //$$ shift = At.Shift.AFTER))
+    //$$ private void corelib$injectIntegratedCommands(Commands.CommandSelection commandSelection, CallbackInfo ci)
+    //$$ {
+        //$$ ((CommandManager) CommandManager.getInstance()).registerCommands(this.dispatcher);
+    //$$ }
     //#else
     @Inject(method = "<init>",
         at = @At(value = "INVOKE",

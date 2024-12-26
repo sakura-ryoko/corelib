@@ -40,7 +40,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //#endif
 
 import com.sakuraryoko.corelib.impl.events.server.ServerEventsManager;
-import com.sakuraryoko.corelib.impl.modinit.ModInitManager;
 
 @ApiStatus.Internal
 @Mixin(MinecraftServer.class)
@@ -105,6 +104,5 @@ public abstract class MixinMinecraftServer
     private void corelib$onStoppedServer(CallbackInfo ci)
     {
         ((ServerEventsManager) ServerEventsManager.getInstance()).onStoppedInternal((MinecraftServer) (Object) this);
-        ((ModInitManager) ModInitManager.getInstance()).reset();
     }
 }

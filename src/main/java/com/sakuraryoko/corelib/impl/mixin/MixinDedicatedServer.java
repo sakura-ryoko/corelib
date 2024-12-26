@@ -20,19 +20,29 @@
 
 package com.sakuraryoko.corelib.impl.mixin;
 
-import java.io.File;
 import org.jetbrains.annotations.ApiStatus;
 
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
 //#if MC >= 11902
 //$$ import net.minecraft.server.Services;
 //$$ import net.minecraft.server.WorldStem;
 //$$ import net.minecraft.server.packs.repository.PackRepository;
 //$$ import net.minecraft.world.level.storage.LevelStorageSource;
+//#elseif MC >= 11802
+//$$ import net.minecraft.server.WorldStem;
+//$$ import net.minecraft.server.packs.repository.PackRepository;
+//$$ import net.minecraft.world.level.storage.LevelStorageSource;
+//#elseif MC >= 11605
+//$$ import net.minecraft.core.RegistryAccess;
+//$$ import net.minecraft.server.packs.repository.PackRepository;
+//$$ import net.minecraft.server.ServerResources;
+//$$ import net.minecraft.world.level.storage.LevelStorageSource;
+//$$ import net.minecraft.world.level.storage.WorldData;
 //#else
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import java.io.File;
 //#endif
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
@@ -46,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.sakuraryoko.corelib.impl.config.ConfigManager;
 import com.sakuraryoko.corelib.impl.events.server.ServerEventsManager;
+import com.sakuraryoko.corelib.impl.modinit.CoreInit;
 import com.sakuraryoko.corelib.impl.modinit.ModInitManager;
 
 @ApiStatus.Internal
@@ -59,6 +70,19 @@ public class MixinDedicatedServer
                                               //$$ DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
                                               //$$ Services services, ChunkProgressListenerFactory chunkProgressListenerFactory,
                                               //$$ CallbackInfo ci)
+//#elseif MC >= 11802
+    //$$ private void corelib$onDedicatedServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository,
+                                           //$$ WorldStem worldStem, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
+                                           //$$ MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository,
+                                           //$$ GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory,
+                                           //$$ CallbackInfo ci)
+//#elseif MC >= 11605
+    //$$ private void corelib$onDedicatedServer(Thread thread, RegistryAccess.RegistryHolder registryHolder, LevelStorageSource.LevelStorageAccess levelStorageAccess,
+                                           //$$ PackRepository packRepository, ServerResources serverResources, WorldData worldData,
+                                           //$$ DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
+                                           //$$ MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository,
+                                           //$$ GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory,
+                                           //$$ CallbackInfo ci)
 //#else
 private void corelib$onDedicatedServer(File file, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
                                        YggdrasilAuthenticationService yggdrasilAuthenticationService,
@@ -67,6 +91,7 @@ private void corelib$onDedicatedServer(File file, DedicatedServerSettings dedica
                                        String string, CallbackInfo ci)
 //#endif
     {
+        ModInitManager.getInstance().registerModInitHandler(new CoreInit());
         ((ModInitManager) ModInitManager.getInstance()).onModInit();
     }
 
@@ -86,5 +111,6 @@ private void corelib$onDedicatedServer(File file, DedicatedServerSettings dedica
     {
         ((ServerEventsManager) ServerEventsManager.getInstance()).onDedicatedStoppingInternal(((DedicatedServer) (Object) this));
         ConfigManager.getInstance().saveAllConfigs();
+        ((ModInitManager) ModInitManager.getInstance()).reset();
     }
 }

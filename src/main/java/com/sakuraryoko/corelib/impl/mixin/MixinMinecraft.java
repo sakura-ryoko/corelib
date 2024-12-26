@@ -42,9 +42,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.sakuraryoko.corelib.impl.CoreLib;
 import com.sakuraryoko.corelib.impl.config.ConfigManager;
 import com.sakuraryoko.corelib.impl.events.client.ClientEventsManager;
+import com.sakuraryoko.corelib.impl.modinit.CoreInit;
 import com.sakuraryoko.corelib.impl.modinit.ModInitManager;
 
 @ApiStatus.Internal
@@ -63,6 +63,7 @@ public abstract class MixinMinecraft
     @Inject(method = "<init>", at = @At("RETURN"))
     private void corelib$onGameInit(GameConfig gameConfig, CallbackInfo ci)
     {
+        ModInitManager.getInstance().registerModInitHandler(new CoreInit());
         ((ModInitManager) ModInitManager.getInstance()).onModInit();
     }
 
@@ -140,8 +141,6 @@ public abstract class MixinMinecraft
     private void corelib$onDisconnectPost(Screen screen, CallbackInfo ci)
     //#endif
     {
-        CoreLib.LOGGER.error("corelib$onDisconnectPost(): lastlevel: {}, localServer: {}", this.lastLevel != null, this.isLocalServer());
-
         if (this.lastLevel != null)
         {
             ((ClientEventsManager) ClientEventsManager.getInstance()).onDisconnected(this.lastLevel);
@@ -156,6 +155,11 @@ public abstract class MixinMinecraft
 
     //#if MC >= 12006
     //$$ @Inject(method = "clearDownloadedResourcePacks", at = @At("HEAD"))
+    //#elseif MC >= 11903
+    //$$ @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V",
+            //$$ at = @At(value = "INVOKE",
+                     //$$ target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;close()V"))
+
     //#else
     @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V",
             at = @At(value = "INVOKE",

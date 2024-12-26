@@ -20,8 +20,29 @@
 
 package com.sakuraryoko.corelib.test;
 
-public class TestReference
+import com.sakuraryoko.corelib.api.config.IConfigOption;
+
+public class TestConfigOptions implements IConfigOption
 {
-    public static final String MOD_ID = "corelib-test";
-    public static final boolean DEBUG = false;
+    private boolean test;
+
+    public TestConfigOptions()
+    {
+        this.defaults();
+    }
+
+    @Override
+    public void defaults()
+    {
+        this.test = true;
+    }
+
+    @Override
+    public TestConfigOptions copy(IConfigOption opt)
+    {
+        TestConfigOptions opts = (TestConfigOptions) opt;
+        this.test = opts.test;
+
+        return this;
+    }
 }

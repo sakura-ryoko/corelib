@@ -71,6 +71,8 @@ public interface IModInitDispatcher
 
     boolean isDebug();
 
+    boolean isInitComplete();
+
     void onModInit();
 
     default void setIntegratedServer(boolean toggle) {this.getModInit().setIntegratedServer(toggle);}

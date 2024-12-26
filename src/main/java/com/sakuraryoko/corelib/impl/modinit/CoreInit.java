@@ -18,21 +18,21 @@
  * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sakuraryoko.corelib.test;
+package com.sakuraryoko.corelib.impl.modinit;
 
 import com.sakuraryoko.corelib.api.log.AnsiLogger;
 import com.sakuraryoko.corelib.api.modinit.IModInitDispatcher;
 import com.sakuraryoko.corelib.api.modinit.ModInitData;
 import com.sakuraryoko.corelib.api.text.ITextHandler;
-import com.sakuraryoko.corelib.impl.commands.CommandManager;
-import com.sakuraryoko.corelib.impl.config.ConfigManager;
+import com.sakuraryoko.corelib.impl.Reference;
 import com.sakuraryoko.corelib.impl.text.BuiltinTextHandler;
 
-public class TestInit implements IModInitDispatcher
+public class CoreInit implements IModInitDispatcher
 {
-    private static final TestInit INSTANCE = new TestInit();
-    public static TestInit getInstance() { return INSTANCE; }
-    private final ModInitData MOD_DATA = new ModInitData(TestReference.MOD_ID);
+    private static final CoreInit INSTANCE = new CoreInit();
+    public static CoreInit getInstance() { return INSTANCE; }
+
+    private static final ModInitData MOD_DATA = new ModInitData(Reference.MOD_ID);
     private final AnsiLogger LOGGER = new AnsiLogger(this.getClass(), this.isDebug());
     private boolean INIT = false;
 
@@ -45,7 +45,7 @@ public class TestInit implements IModInitDispatcher
     @Override
     public String getModId()
     {
-        return TestReference.MOD_ID;
+        return Reference.MOD_ID;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class TestInit implements IModInitDispatcher
     @Override
     public boolean isDebug()
     {
-        return TestReference.DEBUG;
+        return Reference.DEBUG;
     }
 
     @Override
@@ -69,9 +69,7 @@ public class TestInit implements IModInitDispatcher
     @Override
     public void onModInit()
     {
-        this.LOGGER.debug("Test Init (ModID: {})", this.getModId());
-        ConfigManager.getInstance().registerConfigDispatcher(TestConfigHandler.getInstance());
-        CommandManager.getInstance().registerCommandHandler(new TestCommand());
+        this.LOGGER.debug("CoreLib Init (ModID: {})", this.getModId());
         this.INIT = true;
     }
 }

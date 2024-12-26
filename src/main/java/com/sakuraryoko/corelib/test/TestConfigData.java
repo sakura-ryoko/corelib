@@ -20,8 +20,18 @@
 
 package com.sakuraryoko.corelib.test;
 
-public class TestReference
+import com.google.gson.annotations.SerializedName;
+
+import com.sakuraryoko.corelib.api.config.IConfigData;
+
+public class TestConfigData implements IConfigData
 {
-    public static final String MOD_ID = "corelib-test";
-    public static final boolean DEBUG = false;
+    @SerializedName("___comment")
+    public String comment = "Test Comment";
+
+    @SerializedName("config_date")
+    public String config_date;
+
+    @SerializedName("test")
+    public TestConfigOptions TEST = new TestConfigOptions();
 }

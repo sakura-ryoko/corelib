@@ -32,12 +32,12 @@ import net.minecraft.server.level.ServerPlayer;
 //#else
 //#endif
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.level.dimension.DimensionType;
 //#if MC >= 12101
 //$$ import net.minecraft.world.entity.Entity;
 //#elseif MC >= 11902
 //$$ import net.minecraft.world.entity.player.ProfilePublicKey;
 //#else
+import net.minecraft.world.level.dimension.DimensionType;
 //#endif
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -104,26 +104,20 @@ public abstract class MixinPlayerList
     //#endif
 
     // respawnPlayer
-    //#if MC >= 12101
-    //$$ @Inject(method = "respawn", at = @At("RETURN"))
-    //$$ private void corelib$onRespawn(ServerPlayer serverPlayer, boolean bl, Entity.RemovalReason removalReason, CallbackInfoReturnable<ServerPlayer> cir)
-    //$$ {
-        //$$ ((PlayerEventsManager) PlayerEventsManager.getInstance()).onPlayerRespawn(cir.getReturnValue());
-    //$$ }
-    //#elseif MC >= 11902
-    //$$ @Inject(method = "respawn", at = @At("RETURN"))
-    //$$ private void corelib$onRespawn(ServerPlayer serverPlayer, boolean bl, CallbackInfoReturnable<ServerPlayer> cir)
-    //$$ {
-        //$$ ((PlayerEventsManager) PlayerEventsManager.getInstance()).onPlayerRespawn(cir.getReturnValue());
-    //$$ }
-    //#else
     @Inject(method = "respawn", at = @At("RETURN"))
+    //#if MC >= 12101
+    //$$ private void corelib$onRespawn(ServerPlayer serverPlayer, boolean bl, Entity.RemovalReason removalReason, CallbackInfoReturnable<ServerPlayer> cir)
+    //#elseif MC >= 11902
+    //$$ private void corelib$onRespawn(ServerPlayer serverPlayer, boolean bl, CallbackInfoReturnable<ServerPlayer> cir)
+    //#elseif MC >= 11605
+    //$$ private void corelib$onRespawn(ServerPlayer serverPlayer, boolean bl, CallbackInfoReturnable<ServerPlayer> cir)
+    //#else
     private void corelib$onRespawn(ServerPlayer serverPlayer, DimensionType dimensionType, boolean bl, CallbackInfoReturnable<ServerPlayer> cir)
+    //#endif
     {
         // serverPlayer = oldObject
         ((PlayerEventsManager) PlayerEventsManager.getInstance()).onPlayerRespawn(cir.getReturnValue());
     }
-    //#endif
 
     // remove
     @Inject(method = "remove", at = @At("HEAD"))

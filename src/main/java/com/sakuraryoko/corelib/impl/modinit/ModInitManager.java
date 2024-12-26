@@ -24,10 +24,13 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jetbrains.annotations.ApiStatus;
 
+import com.sakuraryoko.corelib.api.log.AnsiLogger;
 import com.sakuraryoko.corelib.api.modinit.IModInitDispatcher;
+import com.sakuraryoko.corelib.impl.Reference;
 
 public class ModInitManager implements IModInitManager
 {
+    private final AnsiLogger LOGGER = new AnsiLogger(this.getClass(), Reference.DEBUG);
     private static final ModInitManager INSTANCE = new ModInitManager();
     public static IModInitManager getInstance() { return INSTANCE; }
     private final List<IModInitDispatcher> DISPATCH = new ArrayList<>();
@@ -35,9 +38,12 @@ public class ModInitManager implements IModInitManager
     @Override
     public void registerModInitHandler(IModInitDispatcher handler) throws RuntimeException
     {
+        this.LOGGER.debug("registerModInitHandler()");
+
         if (!this.DISPATCH.contains(handler))
         {
             this.DISPATCH.add(handler);
+            if (!handler.isInitComplete()) { handler.onModInit(); }
         }
         else
         {
@@ -48,15 +54,22 @@ public class ModInitManager implements IModInitManager
     @ApiStatus.Internal
     public void onModInit()
     {
+        this.LOGGER.debug("onModInit()");
+
         if (!this.DISPATCH.isEmpty())
         {
-            this.DISPATCH.forEach(IModInitDispatcher::onModInit);
+            this.DISPATCH.forEach((handler) ->
+            {
+                if (!handler.isInitComplete()) { handler.onModInit(); }
+            });
         }
     }
 
     @ApiStatus.Internal
     public void setIntegratedServer(boolean toggle)
     {
+        this.LOGGER.debug("setIntegratedServer()");
+
         if (!this.DISPATCH.isEmpty())
         {
             this.DISPATCH.forEach((handler) -> handler.setIntegratedServer(toggle));
@@ -66,6 +79,8 @@ public class ModInitManager implements IModInitManager
     @ApiStatus.Internal
     public void setDedicatedServer(boolean toggle)
     {
+        this.LOGGER.debug("setDedicatedServer()");
+
         if (!this.DISPATCH.isEmpty())
         {
             this.DISPATCH.forEach((handler) -> handler.setDedicatedServer(toggle));
@@ -75,6 +90,8 @@ public class ModInitManager implements IModInitManager
     @ApiStatus.Internal
     public void setOpenToLan(boolean toggle)
     {
+        this.LOGGER.debug("setOpenToLan()");
+
         if (!this.DISPATCH.isEmpty())
         {
             this.DISPATCH.forEach((handler) -> handler.setOpenToLan(toggle));
@@ -84,6 +101,8 @@ public class ModInitManager implements IModInitManager
     @ApiStatus.Internal
     public void reset()
     {
+        this.LOGGER.debug("reset()");
+
         if (!this.DISPATCH.isEmpty())
         {
             this.DISPATCH.forEach(IModInitDispatcher::reset);
