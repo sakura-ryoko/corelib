@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.sakuraryoko.corelib.impl.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "MixinCommands",
+    "MixinDedicatedServer",
+    "MixinMinecraftServer",
+    "MixinPlayerList"
+  ],
+  "client": [
+    "MixinClientPacketListener",
+    "MixinIntegratedServer",
+    "MixinMinecraft"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

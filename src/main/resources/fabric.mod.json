@@ -4,29 +4,35 @@
   "version": "${version}",
 
   "name": "${name}",
-  "description": "Template for my fabric mods",
+  "description": "Sakura Ryoko's Core Library API",
   "authors": [
-    "Fallen_Breath"
+    "sakura-ryoko"
   ],
   "contact": {
-    "homepage": "https://modrinth.com",
-    "sources": "https://github.com/Fallen-Breath/fabric-mod-template"
+    "homepage": "https://github.com/sakura-ryoko/corelib",
+    "sources": "https://github.com/sakura-ryoko/corelib",
+    "issues": "https://github.com/sakura-ryoko/corelib/issues"
   },
 
-  "icon": "assets/template_mod/icon.png",
+  "icon": "assets/corelib/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "me.fallenbreath.template_mod.TemplateMod"
+      "com.sakuraryoko.corelib.impl.CoreLib"
     ]
   },
   "mixins": [
-    "template_mod.mixins.json"
+      "corelib.mixins.json"
   ],
 
   "depends": {
     "fabricloader": ">=0.11.4",
     "minecraft": "${minecraft_dependency}"
+  },
+  "custom": {
+    "modmenu": {
+      "badges": [ "library" ]
+    }
   }
 }
