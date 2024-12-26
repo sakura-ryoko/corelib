@@ -53,9 +53,25 @@ public interface IModInitDispatcher
         return result;
     }
 
-    default List<Component> getFormatted(List<String> elements)
+    default List<Component> getVanillaFormatted(List<String> elements)
     {
         Map<String, Component> infoFmt = this.getModInit().getModFormattedInfo();
+        List<Component> result = new ArrayList<>();
+
+        for (String element : elements)
+        {
+            if (infoFmt.containsKey(element))
+            {
+                result.add(infoFmt.get(element));
+            }
+        }
+
+        return result;
+    }
+
+    default List<Component> getPlaceholderFormatted(List<String> elements)
+    {
+        Map<String, Component> infoFmt = this.getModInit().getModFormattedInfoForPlaceholder();
         List<Component> result = new ArrayList<>();
 
         for (String element : elements)

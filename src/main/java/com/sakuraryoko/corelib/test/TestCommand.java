@@ -71,7 +71,7 @@ public class TestCommand implements IServerCommand
 
     private int about(CommandSourceStack src, CommandContext<CommandSourceStack> ctx)
     {
-        List<Component> info = CoreInit.getInstance().getFormatted(ModInitData.ALL_INFO);
+        List<Component> info = CoreInit.getInstance().getVanillaFormatted(ModInitData.ALL_INFO);
         String user = src.getTextName();
 
         for (Component entry : info)

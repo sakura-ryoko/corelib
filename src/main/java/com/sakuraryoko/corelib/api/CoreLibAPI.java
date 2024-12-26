@@ -38,205 +38,193 @@ import com.sakuraryoko.corelib.impl.modinit.ModInitManager;
 
 public interface CoreLibAPI
 {
-    class ModInit
+    static boolean registerModInitHandler(@Nonnull IModInitDispatcher dispatch)
     {
-        static boolean registerModInitHandler(@Nonnull IModInitDispatcher dispatch)
+        try
         {
-            try
-            {
-                ModInitManager.getInstance().registerModInitHandler(dispatch);
-                return true;
-            }
-            catch (RuntimeException err)
-            {
-                CoreLib.LOGGER.error("RuntimeException using registerModInitHandler() --> {}", err.getMessage());
-            }
-
-            return false;
+            ModInitManager.getInstance().registerModInitHandler(dispatch);
+            return true;
         }
+        catch (RuntimeException err)
+        {
+            CoreLib.LOGGER.error("RuntimeException using registerModInitHandler() --> {}", err.getMessage());
+        }
+
+        return false;
     }
 
-    class Config
+    static boolean registerConfigDispatch(@Nonnull IConfigDispatch dispatch)
     {
-        static boolean registerConfigDispatch(@Nonnull IConfigDispatch dispatch)
+        try
         {
-            try
-            {
-                ConfigManager.getInstance().registerConfigDispatcher(dispatch);
-                return true;
-            }
-            catch (RuntimeException err)
-            {
-                CoreLib.LOGGER.error("RuntimeException using registerConfigDispatch() --> {}", err.getMessage());
-            }
-
-            return false;
+            ConfigManager.getInstance().registerConfigDispatcher(dispatch);
+            return true;
+        }
+        catch (RuntimeException err)
+        {
+            CoreLib.LOGGER.error("RuntimeException using registerConfigDispatch() --> {}", err.getMessage());
         }
 
-        static void initAllConfigs()
-        {
-            ConfigManager.getInstance().initAllConfigs();
-        }
-
-        static void defaultAllConfigs()
-        {
-            ConfigManager.getInstance().defaultAllConfigs();
-        }
-
-        static void loadAllConfigs()
-        {
-            ConfigManager.getInstance().loadAllConfigs();
-        }
-
-        static void saveAllConfigs()
-        {
-            ConfigManager.getInstance().saveAllConfigs();
-        }
-
-        static void reloadAllConfigs()
-        {
-            ConfigManager.getInstance().reloadAllConfigs();
-        }
-
-        static boolean initEachConfig(@Nonnull IConfigDispatch dispatch)
-        {
-            try
-            {
-                ConfigManager.getInstance().initEach(dispatch);
-                return true;
-            }
-            catch (RuntimeException err)
-            {
-                CoreLib.LOGGER.error("RuntimeException using initEachConfig() --> {}", err.getMessage());
-            }
-
-            return false;
-        }
-
-        static boolean defaultEachConfig(@Nonnull IConfigDispatch dispatch)
-        {
-            try
-            {
-                ConfigManager.getInstance().defaultEach(dispatch);
-                return true;
-            }
-            catch (RuntimeException err)
-            {
-                CoreLib.LOGGER.error("RuntimeException using defaultEachConfig() --> {}", err.getMessage());
-            }
-
-            return false;
-        }
-
-        static boolean loadEachConfig(@Nonnull IConfigDispatch dispatch)
-        {
-            try
-            {
-                ConfigManager.getInstance().loadEach(dispatch);
-                return true;
-            }
-            catch (RuntimeException err)
-            {
-                CoreLib.LOGGER.error("RuntimeException using loadEachConfig() --> {}", err.getMessage());
-            }
-
-            return false;
-        }
-
-        static boolean saveEachConfig(@Nonnull IConfigDispatch dispatch)
-        {
-            try
-            {
-                ConfigManager.getInstance().saveEach(dispatch);
-                return true;
-            }
-            catch (RuntimeException err)
-            {
-                CoreLib.LOGGER.error("RuntimeException using saveEachConfig() --> {}", err.getMessage());
-            }
-
-            return false;
-        }
-
-        static boolean reloadEachConfig(@Nonnull IConfigDispatch dispatch)
-        {
-            try
-            {
-                ConfigManager.getInstance().reloadEach(dispatch);
-                return true;
-            }
-            catch (RuntimeException err)
-            {
-                CoreLib.LOGGER.error("RuntimeException using reloadEachConfig() --> {}", err.getMessage());
-            }
-
-            return false;
-        }
+        return false;
     }
 
-    class Commands
+    static void initAllConfigs()
     {
-        static boolean registerServerCommand(@Nonnull IServerCommand command)
-        {
-            try
-            {
-                CommandManager.getInstance().registerCommandHandler(command);
-                return true;
-            }
-            catch (RuntimeException err)
-            {
-                CoreLib.LOGGER.error("RuntimeException using registerServerCommand() --> {}", err.getMessage());
-            }
-
-            return false;
-        }
+        ConfigManager.getInstance().initAllConfigs();
     }
 
-    class Events
+    static void defaultAllConfigs()
     {
-        static boolean registerClientEventsDispatcher(IClientEventsDispatch dispatch)
-        {
-            try
-            {
-                ClientEventsManager.getInstance().registerClientEvents(dispatch);
-                return true;
-            }
-            catch (RuntimeException err)
-            {
-                CoreLib.LOGGER.error("RuntimeException using registerClientEventsDispatcher() --> {}", err.getMessage());
-            }
+        ConfigManager.getInstance().defaultAllConfigs();
+    }
 
-            return false;
+    static void loadAllConfigs()
+    {
+        ConfigManager.getInstance().loadAllConfigs();
+    }
+
+    static void saveAllConfigs()
+    {
+        ConfigManager.getInstance().saveAllConfigs();
+    }
+
+    static void reloadAllConfigs()
+    {
+        ConfigManager.getInstance().reloadAllConfigs();
+    }
+
+    static boolean initEachConfig(@Nonnull IConfigDispatch dispatch)
+    {
+        try
+        {
+            ConfigManager.getInstance().initEach(dispatch);
+            return true;
+        }
+        catch (RuntimeException err)
+        {
+            CoreLib.LOGGER.error("RuntimeException using initEachConfig() --> {}", err.getMessage());
         }
 
-        static boolean registerServerEventsDispatcher(IServerEventsDispatch dispatch)
-        {
-            try
-            {
-                ServerEventsManager.getInstance().registerEventDispatcher(dispatch);
-                return true;
-            }
-            catch (RuntimeException err)
-            {
-                CoreLib.LOGGER.error("RuntimeException using registerServerEventsDispatcher() --> {}", err.getMessage());
-            }
+        return false;
+    }
 
-            return false;
+    static boolean defaultEachConfig(@Nonnull IConfigDispatch dispatch)
+    {
+        try
+        {
+            ConfigManager.getInstance().defaultEach(dispatch);
+            return true;
+        }
+        catch (RuntimeException err)
+        {
+            CoreLib.LOGGER.error("RuntimeException using defaultEachConfig() --> {}", err.getMessage());
         }
 
-        static boolean registerPlayerEventsDispatcher(IPlayerEventsDispatch dispatch)
-        {
-            try
-            {
-                PlayerEventsManager.getInstance().registerPlayerEvents(dispatch);
-                return true;
-            }
-            catch (RuntimeException err)
-            {
-                CoreLib.LOGGER.error("RuntimeException using registerPlayerEventsDispatcher() --> {}", err.getMessage());
-            }
+        return false;
+    }
 
-            return false;
+    static boolean loadEachConfig(@Nonnull IConfigDispatch dispatch)
+    {
+        try
+        {
+            ConfigManager.getInstance().loadEach(dispatch);
+            return true;
         }
+        catch (RuntimeException err)
+        {
+            CoreLib.LOGGER.error("RuntimeException using loadEachConfig() --> {}", err.getMessage());
+        }
+
+        return false;
+    }
+
+    static boolean saveEachConfig(@Nonnull IConfigDispatch dispatch)
+    {
+        try
+        {
+            ConfigManager.getInstance().saveEach(dispatch);
+            return true;
+        }
+        catch (RuntimeException err)
+        {
+            CoreLib.LOGGER.error("RuntimeException using saveEachConfig() --> {}", err.getMessage());
+        }
+
+        return false;
+    }
+
+    static boolean reloadEachConfig(@Nonnull IConfigDispatch dispatch)
+    {
+        try
+        {
+            ConfigManager.getInstance().reloadEach(dispatch);
+            return true;
+        }
+        catch (RuntimeException err)
+        {
+            CoreLib.LOGGER.error("RuntimeException using reloadEachConfig() --> {}", err.getMessage());
+        }
+
+        return false;
+    }
+
+    static boolean registerServerCommand(@Nonnull IServerCommand command)
+    {
+        try
+        {
+            CommandManager.getInstance().registerCommandHandler(command);
+            return true;
+        }
+        catch (RuntimeException err)
+        {
+            CoreLib.LOGGER.error("RuntimeException using registerServerCommand() --> {}", err.getMessage());
+        }
+
+        return false;
+    }
+
+    static boolean registerClientEventsDispatcher(IClientEventsDispatch dispatch)
+    {
+        try
+        {
+            ClientEventsManager.getInstance().registerClientEvents(dispatch);
+            return true;
+        }
+        catch (RuntimeException err)
+        {
+            CoreLib.LOGGER.error("RuntimeException using registerClientEventsDispatcher() --> {}", err.getMessage());
+        }
+
+        return false;
+    }
+
+    static boolean registerServerEventsDispatcher(IServerEventsDispatch dispatch)
+    {
+        try
+        {
+            ServerEventsManager.getInstance().registerEventDispatcher(dispatch);
+            return true;
+        }
+        catch (RuntimeException err)
+        {
+            CoreLib.LOGGER.error("RuntimeException using registerServerEventsDispatcher() --> {}", err.getMessage());
+        }
+
+        return false;
+    }
+
+    static boolean registerPlayerEventsDispatcher(IPlayerEventsDispatch dispatch)
+    {
+        try
+        {
+            PlayerEventsManager.getInstance().registerPlayerEvents(dispatch);
+            return true;
+        }
+        catch (RuntimeException err)
+        {
+            CoreLib.LOGGER.error("RuntimeException using registerPlayerEventsDispatcher() --> {}", err.getMessage());
+        }
+
+        return false;
     }
 }

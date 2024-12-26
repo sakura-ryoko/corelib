@@ -20,11 +20,8 @@
 
 package com.sakuraryoko.corelib.impl.commands;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import com.sakuraryoko.corelib.api.commands.IServerCommand;
 
-@ApiStatus.Internal
 public interface ICommandManager
 {
     void registerCommandHandler(IServerCommand command);

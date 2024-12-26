@@ -344,6 +344,50 @@ public class ModInitData
         return fmtInfo;
     }
 
+    public Map<String, Component> getModFormattedInfoForPlaceholder()
+    {
+        Map<String, Component> fmtInfo = new HashMap<>();
+
+        fmtInfo.put("ver", this.iTextUtils.of(this.modName + "-" + this.mcVersion + "-" + this.modVersion));
+
+        if (!this.authorString.isEmpty())
+        {
+            fmtInfo.put("auth", this.iTextUtils.formatTextSafe("Author: <pink>" + this.authorString + "</pink>"));
+        }
+
+        if (!this.contribString.isEmpty())
+        {
+            fmtInfo.put("con", this.iTextUtils.formatTextSafe("Contrib: <lime>" + this.contribString + "</lime>"));
+        }
+
+        if (!this.licenseString.isEmpty())
+        {
+            fmtInfo.put("lic", this.iTextUtils.formatTextSafe("License: <yellow>" + this.licenseString + "</yellow>"));
+        }
+
+        if (!this.homepage.isEmpty())
+        {
+            fmtInfo.put("home", this.iTextUtils.formatTextSafe("Homepage: <cyan><url:'" + this.homepage + "'>" + this.homepage + "</url></cyan>"));
+        }
+
+        if (!this.source.isEmpty())
+        {
+            fmtInfo.put("src", this.iTextUtils.formatTextSafe("Source: <cyan><url:'" + this.source + "'>" + this.source + "</url></cyan>"));
+        }
+
+        if (!this.issues.isEmpty())
+        {
+            fmtInfo.put("iss", this.iTextUtils.formatTextSafe("Issues: <cyan><url:'" + this.issues + "'>" + this.issues + "</url></cyan>"));
+        }
+
+        if (!this.description.isEmpty())
+        {
+            fmtInfo.put("desc", this.iTextUtils.formatTextSafe("Description: <light_blue>" + this.description + "</light_blue>"));
+        }
+
+        return fmtInfo;
+    }
+
     public void reset()
     {
         CoreLib.debugLog("ModInitData: reset()");
