@@ -20,8 +20,6 @@
 
 package com.sakuraryoko.corelib.impl.mixin;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.world.level.GameType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +30,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.sakuraryoko.corelib.impl.events.server.ServerEventsManager;
 import com.sakuraryoko.corelib.impl.modinit.ModInitManager;
 
-@ApiStatus.Internal
 @Mixin(IntegratedServer.class)
 public class MixinIntegratedServer
 {

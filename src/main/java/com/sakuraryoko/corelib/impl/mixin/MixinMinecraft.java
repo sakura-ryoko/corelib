@@ -20,7 +20,6 @@
 
 package com.sakuraryoko.corelib.impl.mixin;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
@@ -47,7 +46,6 @@ import com.sakuraryoko.corelib.impl.events.client.ClientEventsManager;
 import com.sakuraryoko.corelib.impl.modinit.CoreInit;
 import com.sakuraryoko.corelib.impl.modinit.ModInitManager;
 
-@ApiStatus.Internal
 @Mixin(Minecraft.class)
 public abstract class MixinMinecraft
 {

@@ -30,8 +30,15 @@ import net.minecraft.network.chat.TextComponent;
 
 import com.sakuraryoko.corelib.api.text.ITextHandler;
 
+/**
+ * For Compatibility with older versions of Minecraft using
+ * the same syntax as the Placeholder API TextHandler
+ */
 public class BuiltinTextHandler implements ITextHandler
 {
+    private static final BuiltinTextHandler INSTANCE = new BuiltinTextHandler();
+    public static BuiltinTextHandler getInstance() { return INSTANCE; }
+
     @Override
     public Component formatTextSafe(@Nonnull String s)
     {

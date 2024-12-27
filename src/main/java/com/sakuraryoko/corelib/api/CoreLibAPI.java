@@ -22,6 +22,8 @@ package com.sakuraryoko.corelib.api;
 
 import javax.annotation.Nonnull;
 
+import net.minecraft.network.chat.Component;
+
 import com.sakuraryoko.corelib.api.commands.IServerCommand;
 import com.sakuraryoko.corelib.api.config.IConfigDispatch;
 import com.sakuraryoko.corelib.api.events.IClientEventsDispatch;
@@ -35,6 +37,7 @@ import com.sakuraryoko.corelib.impl.events.client.ClientEventsManager;
 import com.sakuraryoko.corelib.impl.events.players.PlayerEventsManager;
 import com.sakuraryoko.corelib.impl.events.server.ServerEventsManager;
 import com.sakuraryoko.corelib.impl.modinit.ModInitManager;
+import com.sakuraryoko.corelib.impl.time.TimeTestExample;
 
 public interface CoreLibAPI
 {
@@ -226,5 +229,15 @@ public interface CoreLibAPI
         }
 
         return false;
+    }
+
+    static Component getTimeDurationTest(boolean usePlaceholder)
+    {
+        return TimeTestExample.runDurationTest(usePlaceholder);
+    }
+
+    static Component getTimeDateTest(boolean usePlaceholder)
+    {
+        return TimeTestExample.runTimeDateTest(usePlaceholder);
     }
 }

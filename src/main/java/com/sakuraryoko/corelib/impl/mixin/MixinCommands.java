@@ -20,8 +20,6 @@
 
 package com.sakuraryoko.corelib.impl.mixin;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 //#if MC >= 11902
@@ -37,7 +35,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.sakuraryoko.corelib.impl.commands.CommandManager;
 
-@ApiStatus.Internal
 @Mixin(Commands.class)
 public class MixinCommands
 {

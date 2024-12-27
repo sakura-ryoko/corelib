@@ -25,7 +25,6 @@ package com.sakuraryoko.corelib.impl.mixin;
 //$$ import java.util.concurrent.CompletableFuture;
 //#else
 //#endif
-import org.jetbrains.annotations.ApiStatus;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -41,7 +40,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.sakuraryoko.corelib.impl.events.server.ServerEventsManager;
 
-@ApiStatus.Internal
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer
 {

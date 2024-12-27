@@ -51,7 +51,7 @@ public class TestInit implements IModInitDispatcher
     @Override
     public ITextHandler getTextHandler()
     {
-        return new BuiltinTextHandler();
+        return BuiltinTextHandler.getInstance();
     }
 
     @Override

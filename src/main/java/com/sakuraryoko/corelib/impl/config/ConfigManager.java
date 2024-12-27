@@ -171,12 +171,6 @@ public class ConfigManager implements IConfigManager
                 this.saveEachInternal(handler);
                 handler.onPostSaveConfig();
             }
-            else
-            {
-                handler.onPreLoadConfig();
-                this.loadEachInternal(handler, false);
-                handler.onPostLoadConfig();
-            }
         }
         else
         {

@@ -20,13 +20,10 @@
 
 package com.sakuraryoko.corelib.test;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-
 import com.sakuraryoko.corelib.api.config.IConfigData;
 import com.sakuraryoko.corelib.api.config.IConfigDispatch;
 import com.sakuraryoko.corelib.api.log.AnsiLogger;
+import com.sakuraryoko.corelib.api.time.TimeFormat;
 import com.sakuraryoko.corelib.impl.modinit.CoreInit;
 
 public class TestConfigHandler implements IConfigDispatch
@@ -36,7 +33,7 @@ public class TestConfigHandler implements IConfigDispatch
     public static TestConfigHandler getInstance() { return INSTANCE; }
     private final TestConfigData CONFIG = newConfig();
     private final String CONFIG_ROOT = TestReference.MOD_ID;
-    private final String CONFIG_NAME = "test";
+    private final String CONFIG_NAME = TestReference.MOD_ID;
     private boolean loaded = false;
 
     @Override
@@ -116,7 +113,7 @@ public class TestConfigHandler implements IConfigDispatch
         TestConfigData config = this.newConfig();
 
         this.LOGGER.debug("defaults()");
-        config.config_date = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT).format(ZonedDateTime.now());
+        config.config_date = TimeFormat.RFC1123.formatNow(null);
         config.TEST.defaults();
 
         return config;
@@ -130,7 +127,7 @@ public class TestConfigHandler implements IConfigDispatch
         // Refresh
         this.LOGGER.debug("update()");
         CONFIG.comment = CoreInit.getInstance().getModVersionString() + " Config";
-        CONFIG.config_date = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT).format(ZonedDateTime.now());
+        CONFIG.config_date = TimeFormat.RFC1123.formatNow(null);
         this.LOGGER.info("update(): save_date: {} --> {}", newConf.config_date, CONFIG.config_date);
 
         // Copy Main Config

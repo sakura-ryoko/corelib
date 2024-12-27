@@ -20,8 +20,6 @@
 
 package com.sakuraryoko.corelib.impl.mixin;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
@@ -59,7 +57,6 @@ import com.sakuraryoko.corelib.impl.events.server.ServerEventsManager;
 import com.sakuraryoko.corelib.impl.modinit.CoreInit;
 import com.sakuraryoko.corelib.impl.modinit.ModInitManager;
 
-@ApiStatus.Internal
 @Mixin(DedicatedServer.class)
 public class MixinDedicatedServer
 {

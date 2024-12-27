@@ -20,6 +20,8 @@
 
 package com.sakuraryoko.corelib.impl.modinit;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import com.sakuraryoko.corelib.api.log.AnsiLogger;
 import com.sakuraryoko.corelib.api.modinit.IModInitDispatcher;
 import com.sakuraryoko.corelib.api.modinit.ModInitData;
@@ -27,6 +29,7 @@ import com.sakuraryoko.corelib.api.text.ITextHandler;
 import com.sakuraryoko.corelib.impl.Reference;
 import com.sakuraryoko.corelib.impl.text.BuiltinTextHandler;
 
+@ApiStatus.Internal
 public class CoreInit implements IModInitDispatcher
 {
     private static final CoreInit INSTANCE = new CoreInit();
@@ -51,7 +54,7 @@ public class CoreInit implements IModInitDispatcher
     @Override
     public ITextHandler getTextHandler()
     {
-        return new BuiltinTextHandler();
+        return BuiltinTextHandler.getInstance();
     }
 
     @Override

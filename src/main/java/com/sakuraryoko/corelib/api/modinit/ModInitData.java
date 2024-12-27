@@ -85,7 +85,7 @@ public class ModInitData
         this.integratedServer = false;
         this.dedicatedServer = false;
         this.openToLan = false;
-        this.iTextUtils = new BuiltinTextHandler();
+        this.iTextUtils = BuiltinTextHandler.getInstance();
 
         if (this.instance.getModContainer(this.MOD_ID).isPresent())
         {
