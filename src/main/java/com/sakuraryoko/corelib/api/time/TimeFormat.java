@@ -58,6 +58,11 @@ public enum TimeFormat
         return this.type.init(this);
     }
 
+    public String formatTo(long time)
+    {
+        return this.formatTo(time, null);
+    }
+
     public String formatTo(long time, @Nullable String fmt)
     {
         TimeFmt formatter = this.init();
@@ -70,6 +75,11 @@ public enum TimeFormat
         return "";
     }
 
+    public long formatFrom(@Nonnull String formattedTime)
+    {
+        return this.formatFrom(formattedTime, null);
+    }
+
     public long formatFrom(@Nonnull String formattedTime, @Nullable String fmt)
     {
         TimeFmt formatter = this.init();
@@ -80,6 +90,11 @@ public enum TimeFormat
         }
 
         return 0L;
+    }
+
+    public String formatNow()
+    {
+        return this.formatNow(null);
     }
 
     public String formatNow(@Nullable String fmt)
@@ -107,7 +122,13 @@ public enum TimeFormat
     }
 
     @Nullable
-    public static TimeFormat fromName(String name)
+    public TimeFormat fromString(String value)
+    {
+        return fromStringStatic(value);
+    }
+
+    @Nullable
+    public static TimeFormat fromStringStatic(String name)
     {
         for (TimeFormat val : VALUES)
         {

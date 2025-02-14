@@ -56,11 +56,11 @@ public class TimeTestExample
         {
             if (placeholder)
             {
-                result.append(format.getName().toUpperCase()).append(": <green>(").append(format.getFormat(duration, null)).append(")</green> // [Format: <yellow>").append(format.getFormatString()).append("]<r>\n");
+                result.append(format.getName().toUpperCase()).append(": <green>(").append(format.format(duration)).append(")</green> // [Format: <yellow>").append(format.getFormatString()).append("]<r>\n");
             }
             else
             {
-                result.append(format.getName().toUpperCase()).append(": §a(").append(format.getFormat(duration, null)).append(")§r // [Format: §e").append(format.getFormatString()).append("]§r\n");
+                result.append(format.getName().toUpperCase()).append(": §a(").append(format.format(duration)).append(")§r // [Format: §e").append(format.getFormatString()).append("]§r\n");
             }
         }
 
@@ -82,11 +82,11 @@ public class TimeTestExample
         {
             if (placeholder)
             {
-                result.append(format.getName().toUpperCase()).append(": <green>(").append(format.formatNow(null)).append(")</green> // [Format: <yellow>").append(format.getFormatString()).append("]<r>\n");
+                result.append(format.getName().toUpperCase()).append(": <green>(").append(format.formatNow()).append(")</green> // [Format: <yellow>").append(format.getFormatString()).append("]<r>\n");
             }
             else
             {
-                result.append(format.getName().toUpperCase()).append(": §a(").append(format.formatNow(null)).append(")§r // [Format: §e").append(format.getFormatString()).append("]§r\n");
+                result.append(format.getName().toUpperCase()).append(": §a(").append(format.formatNow()).append(")§r // [Format: §e").append(format.getFormatString()).append("]§r\n");
             }
         }
 

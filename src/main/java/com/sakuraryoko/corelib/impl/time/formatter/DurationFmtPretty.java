@@ -25,6 +25,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import com.sakuraryoko.corelib.api.time.DurationFormat;
+import com.sakuraryoko.corelib.impl.CoreLib;
 
 @ApiStatus.Internal
 public class DurationFmtPretty extends DurationFmt
@@ -38,6 +39,15 @@ public class DurationFmtPretty extends DurationFmt
     @Override
     public String format(long duration, @Nullable String fmt)
     {
-        return DurationFormatUtils.formatDurationWords(duration, true, true);
+        try
+        {
+            return DurationFormatUtils.formatDurationWords(duration, true, true);
+        }
+        catch (Exception err)
+        {
+            CoreLib.LOGGER.error("format(): Invalid Duration format // {}", err.getMessage());
+        }
+
+        return DurationFormatUtils.formatDurationHMS(duration);
     }
 }

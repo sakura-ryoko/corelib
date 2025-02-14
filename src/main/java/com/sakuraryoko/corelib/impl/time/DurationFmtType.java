@@ -38,10 +38,9 @@ public class DurationFmtType<T extends DurationFmt>
     private final DurationFactory<? extends T> factory;
     private final DurationFormat durationFmt;
 
-    @SuppressWarnings("unchecked")
     private static <T extends DurationFmt> DurationFmtType<T> create(DurationFactory<? extends T> factory, DurationFormat durationFmt)
     {
-        return (DurationFmtType) new DurationFmtType(factory, durationFmt);
+        return new DurationFmtType<>(factory, durationFmt);
     }
 
     private DurationFmtType(DurationFactory<? extends T> factory, DurationFormat durationFmt)

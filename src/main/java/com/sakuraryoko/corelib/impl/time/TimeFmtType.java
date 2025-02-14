@@ -39,10 +39,9 @@ public class TimeFmtType<T extends TimeFmt>
     private final TimeFactory<? extends T> factory;
     private final TimeFormat timeFmt;
 
-    @SuppressWarnings("unchecked")
     private static <T extends TimeFmt> TimeFmtType<T> create(TimeFactory<? extends T> factory, TimeFormat timeFmt)
     {
-        return (TimeFmtType) new TimeFmtType(factory, timeFmt);
+        return new TimeFmtType<>(factory, timeFmt);
     }
 
     private TimeFmtType(TimeFactory<? extends T> factory, TimeFormat timeFmt)

@@ -113,7 +113,7 @@ public class TestConfigHandler implements IConfigDispatch
         TestConfigData config = this.newConfig();
 
         this.LOGGER.debug("defaults()");
-        config.config_date = TimeFormat.RFC1123.formatNow(null);
+        config.config_date = TimeFormat.RFC1123.formatNow();
         config.TEST.defaults();
 
         return config;
@@ -127,7 +127,7 @@ public class TestConfigHandler implements IConfigDispatch
         // Refresh
         this.LOGGER.debug("update()");
         CONFIG.comment = CoreInit.getInstance().getModVersionString() + " Config";
-        CONFIG.config_date = TimeFormat.RFC1123.formatNow(null);
+        CONFIG.config_date = TimeFormat.RFC1123.formatNow();
         this.LOGGER.info("update(): save_date: {} --> {}", newConf.config_date, CONFIG.config_date);
 
         // Copy Main Config

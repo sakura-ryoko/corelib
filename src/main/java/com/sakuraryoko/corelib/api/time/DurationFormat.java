@@ -56,7 +56,12 @@ public enum DurationFormat
         return this.type.init(this);
     }
 
-    public String getFormat(long duration, @Nullable String fmt)
+    public String format(long duration)
+    {
+        return this.format(duration, null);
+    }
+
+    public String format(long duration, @Nullable String fmt)
     {
         DurationFmt formatter = this.init();
 
@@ -86,7 +91,13 @@ public enum DurationFormat
     }
 
     @Nullable
-    public static DurationFormat fromName(String name)
+    public DurationFormat fromString(String value)
+    {
+        return fromStringStatic(value);
+    }
+
+    @Nullable
+    public static DurationFormat fromStringStatic(String name)
     {
         for (DurationFormat val : VALUES)
         {
