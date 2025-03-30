@@ -13,11 +13,11 @@ on:
         required: false
         default: ''
       # [FEATURE] MIXIN_AUDITOR
-#      mixin_audit:
-#        description: run mixin audit for Minecraft after build
-#        type: boolean
-#        required: false
-#        default: false
+      mixin_audit:
+        description: run mixin audit for Minecraft after build
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   build:
