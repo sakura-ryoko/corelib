@@ -29,11 +29,14 @@ import com.sakuraryoko.corelib.impl.time.formatter.TimeFmt;
 
 public enum TimeFormat
 {
-    REGULAR     ("regular", TimeFmtType.REGULAR),
+    REGULAR     ("regular",    TimeFmtType.REGULAR),
     ISO_LOCAL   ("iso_local",  TimeFmtType.ISO_LOCAL),
     ISO_OFFSET  ("iso_offset", TimeFmtType.ISO_OFFSET),
     FORMATTED   ("formatted",  TimeFmtType.FORMATTED),
-    RFC1123     ("rfc1123",    TimeFmtType.RFC1123);
+    RFC1123     ("rfc1123",    TimeFmtType.RFC1123),
+    TIME_ONLY   ("time_only",  TimeFmtType.TIME_ONLY),
+    DATE_ONLY   ("date_only",  TimeFmtType.DATE_ONLY),
+    ;
 
     public static final ImmutableList<TimeFormat> VALUES = ImmutableList.copyOf(values());
 
