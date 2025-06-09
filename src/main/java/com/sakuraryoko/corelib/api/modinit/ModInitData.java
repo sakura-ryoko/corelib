@@ -74,7 +74,9 @@ public class ModInitData
             return;
         }
 
-        //#if MC >= 11902
+        //#if MC >= 12106
+        //$$ this.mcVersion = DetectedVersion.BUILT_IN.name();
+        //#elseif MC >= 11902
         //$$ this.mcVersion = DetectedVersion.BUILT_IN.getName();
         //#else
         this.mcVersion = DetectedVersion.tryDetectVersion().getName();

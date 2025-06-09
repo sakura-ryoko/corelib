@@ -61,19 +61,29 @@ public abstract class MixinPlayerList
         ((PlayerEventsManager) PlayerEventsManager.getInstance()).onConnection(address, profile, cir.getReturnValue());
     }
 
-    @Inject(method = "getPlayerForLogin", at = @At("RETURN"))
-    //#if MC >= 12002
+    //#if MC >= 12106
+    //#elseif MC >= 12006
+    //$$ @Inject(method = "getPlayerForLogin", at = @At("RETURN"))
+    //$$ private void corelib$onGetPlayerForLogin(GameProfile gameProfile, ClientInformation clientInformation, CallbackInfoReturnable<ServerPlayer> cir)
+    //#elseif MC >= 12002
+    //$$ @Inject(method = "getPlayerForLogin", at = @At("RETURN"))
     //$$ private void corelib$onGetPlayerForLogin(GameProfile gameProfile, ClientInformation clientInformation, CallbackInfoReturnable<ServerPlayer> cir)
     //#elseif MC >= 11903
+    //$$ @Inject(method = "getPlayerForLogin", at = @At("RETURN"))
     //$$ private void corelib$onGetPlayerForLogin(GameProfile gameProfile, CallbackInfoReturnable<ServerPlayer> cir)
     //#elseif MC >= 11902
+    //$$ @Inject(method = "getPlayerForLogin", at = @At("RETURN"))
     //$$ private void corelib$onGetPlayerForLogin(GameProfile gameProfile, ProfilePublicKey profilePublicKey, CallbackInfoReturnable<ServerPlayer> cir)
     //#else
+    @Inject(method = "getPlayerForLogin", at = @At("RETURN"))
     private void corelib$onGetPlayerForLogin(GameProfile gameProfile, CallbackInfoReturnable<ServerPlayer> cir)
     //#endif
+    //#if MC >= 12106
+    //#else
     {
         ((PlayerEventsManager) PlayerEventsManager.getInstance()).onCreatePlayer(cir.getReturnValue(), gameProfile);
     }
+    //#endif
 
     // onPlayerConnect
     //#if MC >= 12002
