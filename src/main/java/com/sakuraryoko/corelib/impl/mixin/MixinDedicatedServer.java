@@ -44,7 +44,10 @@ import java.io.File;
 //#endif
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
+//#if MC >= 12110
+//#else
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+//#endif
 import net.minecraft.server.players.GameProfileCache;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -61,25 +64,29 @@ import com.sakuraryoko.corelib.impl.modinit.ModInitManager;
 public class MixinDedicatedServer
 {
     @Inject(method = "<init>", at = @At("RETURN"))
-//#if MC >= 11902
+//#if MC >= 12110
+    //$$ private void corelib$onDedicatedServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository,
+												//$$ WorldStem worldStem, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
+											    //$$ Services services, CallbackInfo ci)
+//#elseif MC >= 11902
     //$$ private void corelib$onDedicatedServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess,
-                                              //$$ PackRepository packRepository, WorldStem worldStem,
-                                              //$$ DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
-                                              //$$ Services services, ChunkProgressListenerFactory chunkProgressListenerFactory,
-                                              //$$ CallbackInfo ci)
+												//$$ PackRepository packRepository, WorldStem worldStem,
+												//$$ DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
+												//$$ Services services, ChunkProgressListenerFactory chunkProgressListenerFactory,
+												//$$ CallbackInfo ci)
 //#elseif MC >= 11802
     //$$ private void corelib$onDedicatedServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository,
-                                           //$$ WorldStem worldStem, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
-                                           //$$ MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository,
-                                           //$$ GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory,
-                                           //$$ CallbackInfo ci)
+												//$$ WorldStem worldStem, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
+												//$$ MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository,
+												//$$ GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory,
+												//$$ CallbackInfo ci)
 //#elseif MC >= 11605
     //$$ private void corelib$onDedicatedServer(Thread thread, RegistryAccess.RegistryHolder registryHolder, LevelStorageSource.LevelStorageAccess levelStorageAccess,
-                                           //$$ PackRepository packRepository, ServerResources serverResources, WorldData worldData,
-                                           //$$ DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
-                                           //$$ MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository,
-                                           //$$ GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory,
-                                           //$$ CallbackInfo ci)
+												//$$ PackRepository packRepository, ServerResources serverResources, WorldData worldData,
+												//$$ DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
+												//$$ MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository,
+												//$$ GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory,
+												//$$ CallbackInfo ci)
 //#else
 private void corelib$onDedicatedServer(File file, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
                                        YggdrasilAuthenticationService yggdrasilAuthenticationService,

@@ -59,11 +59,19 @@ public class PlayerEventsManager implements IPlayerEventsManager
     {
         if (result == null)
         {
+//#if MC >= 12110
+	        //$$ CoreLib.debugLog("onConnection: connection from {} // {}", addr.toString(), profile.id().toString());
+        //$$ }
+        //$$ else
+        //$$ {
+	        //$$ CoreLib.debugLog("onConnection: connection from {} // {} --> result: {}", addr.toString(), profile.id().toString(), result.getString());
+//#else
             CoreLib.debugLog("onConnection: connection from {} // {}", addr.toString(), profile.getId().toString());
         }
         else
         {
             CoreLib.debugLog("onConnection: connection from {} // {} --> result: {}", addr.toString(), profile.getId().toString(), result.getString());
+//#endif
         }
 
         if (!this.DISPATCH.isEmpty())

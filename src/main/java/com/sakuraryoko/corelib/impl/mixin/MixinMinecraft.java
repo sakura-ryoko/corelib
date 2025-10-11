@@ -30,7 +30,8 @@ import net.minecraft.client.main.GameConfig;
 //#else
 import net.minecraft.client.multiplayer.MultiPlayerLevel;
 //#endif
-//#if MC >= 12006
+//#if MC >= 12110
+//#elseif MC >= 12006
 //$$ import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 //#else
 //#endif
@@ -66,7 +67,9 @@ public abstract class MixinMinecraft
     }
 
     @Inject(method = "setLevel", at = @At("HEAD"))
-    //#if MC >= 12006
+    //#if MC >= 12110
+    //$$ private void corelib$onWorldJoinPre(ClientLevel clientLevel, CallbackInfo ci)
+    //#elseif MC >= 12006
     //$$ private void corelib$onWorldJoinPre(ClientLevel clientLevel, ReceivingLevelScreen.Reason reason, CallbackInfo ci)
     //#elseif MC >= 11902
     //$$ private void corelib$onWorldJoinPre(ClientLevel clientLevel, CallbackInfo ci)
@@ -87,7 +90,9 @@ public abstract class MixinMinecraft
     }
 
     @Inject(method = "setLevel", at = @At("RETURN"))
-    //#if MC >= 12006
+    //#if MC >= 12110
+    //$$ private void corelib$onWorldJoinPost(ClientLevel clientLevel, CallbackInfo ci)
+    //#elseif MC >= 12006
     //$$ private void corelib$onWorldJoinPost(ClientLevel clientLevel, ReceivingLevelScreen.Reason reason, CallbackInfo ci)
     //#elseif MC >= 11902
     //$$ private void corelib$onWorldJoinPost(ClientLevel clientLevel, CallbackInfo ci)
