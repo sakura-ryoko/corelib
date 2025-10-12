@@ -32,7 +32,7 @@ public interface IPlayerEventsDispatch
 {
     void onConnection(SocketAddress addr, GameProfile profile, @Nullable Component result);
 
-    void onCreatePlayer(ServerPlayer player, GameProfile profile);
+    void onCreatePlayer(ServerPlayer player, @Nullable GameProfile profile);
 
     void onPlayerJoinPre(ServerPlayer player, Connection connection);
 

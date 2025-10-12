@@ -84,11 +84,16 @@ loom {
 	// [FEATURE] MIXIN_AUDITOR
 //	runs {
 //		def auditVmArgs = [*commonVmArgs, '-DmixinAuditor.audit=true']
-//		serverMixinAudit {
-//			server()
+//		clientMixinAudit {
+//			client()
 //			vmArgs auditVmArgs
 //			ideConfigGenerated false
 //		}
+//        serverMixinAudit {
+//            server()
+//            vmArgs auditVmArgs
+//            ideConfigGenerated false
+//        }
 //	}
 }
 

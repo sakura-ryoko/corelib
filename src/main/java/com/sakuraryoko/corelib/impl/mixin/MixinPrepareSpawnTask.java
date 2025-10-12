@@ -2,7 +2,7 @@
  * This file is part of the CoreLib project, licensed under the
  * GNU Lesser General Public License v3.0
  *
- * Copyright (C) 2024  Sakura Ryoko and contributors
+ * Copyright (C) 2025  Sakura Ryoko and contributors
  *
  * CoreLib is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,24 +18,13 @@
  * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sakuraryoko.corelib.impl;
+package com.sakuraryoko.corelib.impl.mixin;
 
-import java.nio.file.Path;
-import org.jetbrains.annotations.ApiStatus;
+import org.spongepowered.asm.mixin.Mixin;
 
-import net.minecraft.SharedConstants;
-import net.fabricmc.loader.api.FabricLoader;
+import com.sakuraryoko.corelib.impl.util.MixinDummy;
 
-@ApiStatus.Internal
-public class Reference
+@Mixin(MixinDummy.class)
+public class MixinPrepareSpawnTask
 {
-	public static final Path GAME_DIR = FabricLoader.getInstance().getGameDir();
-    public static final Path CONFIG_DIR = FabricLoader.getInstance().getConfigDir();
-    public static final String MOD_ID = "corelib";
-	//#if MC >= 12106
-	//$$ public static final String MC_VERSION = SharedConstants.getCurrentVersion().name();
-	//#else
-	public static final String MC_VERSION = SharedConstants.getCurrentVersion().getName();
-	//#endif
-    public static final boolean DEBUG = false;
 }

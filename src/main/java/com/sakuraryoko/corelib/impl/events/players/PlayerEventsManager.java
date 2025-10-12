@@ -38,8 +38,8 @@ public class PlayerEventsManager implements IPlayerEventsManager
 {
     private static final PlayerEventsManager INSTANCE = new PlayerEventsManager();
     private final List<IPlayerEventsDispatch> DISPATCH = new ArrayList<>();
-
-    public static IPlayerEventsManager getInstance() {return INSTANCE;}
+    public static IPlayerEventsManager getInstance() { return INSTANCE; }
+	private GameProfile lastProfile = null;
 
     @Override
     public void registerPlayerEvents(IPlayerEventsDispatch dispatch) throws RuntimeException
@@ -80,15 +80,31 @@ public class PlayerEventsManager implements IPlayerEventsManager
         }
     }
 
+	// For 1.21.10 in case the game profile doesn't match later
+	@ApiStatus.Internal
+	public void onPreCreatePlayer(GameProfile profile)
+	{
+		this.lastProfile = profile;
+	}
+
     @ApiStatus.Internal
-    public void onCreatePlayer(ServerPlayer player, GameProfile profile)
+    public void onCreatePlayer(ServerPlayer player, @Nullable GameProfile profile)
     {
         CoreLib.debugLog("onCreatePlayer: {}", player.getName().getString());
 
+		if (profile == null && this.lastProfile != null)
+		{
+			profile = this.lastProfile;
+		}
+
+	    final GameProfile profile2 = profile;
+
         if (!this.DISPATCH.isEmpty())
         {
-            this.DISPATCH.forEach((dispatch) -> dispatch.onCreatePlayer(player, profile));
+	        this.DISPATCH.forEach((dispatch) -> dispatch.onCreatePlayer(player, profile2));
         }
+
+		this.lastProfile = null;
     }
 
     @ApiStatus.Internal

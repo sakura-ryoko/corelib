@@ -31,6 +31,10 @@ import net.minecraft.server.level.ServerPlayer;
 //$$ import net.minecraft.server.network.CommonListenerCookie;
 //#else
 //#endif
+//#if MC >= 12110
+//$$ import net.minecraft.server.players.NameAndId;
+//#else
+//#endif
 import net.minecraft.server.players.PlayerList;
 //#if MC >= 12101
 //$$ import net.minecraft.world.entity.Entity;
@@ -56,10 +60,17 @@ public abstract class MixinPlayerList
     }
 
     @Inject(method = "canPlayerLogin", at = @At("RETURN"))
+    //#if MC >= 12110
+    //$$ private void corelib$canPlayerLogin(SocketAddress socketAddress, NameAndId nameAndId, CallbackInfoReturnable<Component> cir)
+	//$$ {
+		//$$ ((PlayerEventsManager) PlayerEventsManager.getInstance()).onConnection(socketAddress, new GameProfile(nameAndId.id(), nameAndId.name()), cir.getReturnValue());
+    //$$ }
+    //#else
     private void corelib$canPlayerLogin(SocketAddress address, GameProfile profile, CallbackInfoReturnable<Component> cir)
     {
         ((PlayerEventsManager) PlayerEventsManager.getInstance()).onConnection(address, profile, cir.getReturnValue());
     }
+	//#endif
 
     //#if MC >= 12106
     //#elseif MC >= 12006
