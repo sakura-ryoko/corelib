@@ -25,6 +25,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import com.sakuraryoko.corelib.impl.util.MixinDummy;
 
 @Mixin(MixinDummy.class)
-public interface IMixinClientboundCustomPayloadPacket
+public class C2SPayload_MixinServerboundCustomPayloadPacket
 {
 }

@@ -18,7 +18,7 @@
  * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sakuraryoko.corelib.impl.mixin.network;
+package com.sakuraryoko.corelib.impl.mixin.network.common;
 
 //#if MC >= 11902
 //$$ import net.minecraft.client.multiplayer.ClientLevel;

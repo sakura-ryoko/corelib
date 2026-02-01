@@ -21,10 +21,9 @@
 package com.sakuraryoko.corelib.impl.mixin.network.payload;
 
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -33,19 +32,22 @@ import com.sakuraryoko.corelib.impl.Reference;
 import com.sakuraryoko.corelib.impl.network.announcer.CoreServiceHandler;
 import com.sakuraryoko.corelib.impl.network.announcer.CoreServicePacket;
 
-@Mixin(ServerGamePacketListenerImpl.class)
-public class MixinServerGamePacketListenerImpl_C2SPayload
+@Mixin(ServerCommonPacketListenerImpl.class)
+public abstract class C2SPayload_MixinServerCommonPacketListenerImpl
 {
-	@Shadow public ServerPlayer player;
-
 	@Inject(method = "handleCustomPayload", at = @At("HEAD"), cancellable = true)
 	private void corelib$handleCustomPayload(ServerboundCustomPayloadPacket packet, CallbackInfo ci)
 	{
 		if (!Reference.EXPERIMENTAL) return;
-		if (packet.payload().type().id().equals(CoreServicePacket.PACKET_ID))
+		if ((ServerCommonPacketListenerImpl) (Object) this instanceof ServerGamePacketListenerImpl)
 		{
-			CoreServiceHandler.getInstance().getServerHandler().receivePacket(packet, this.player);
-			ci.cancel();
+			if (packet.payload().type().id().equals(CoreServicePacket.PACKET_ID))
+			{
+				ServerGamePacketListenerImpl handler = (ServerGamePacketListenerImpl) (Object) this;
+
+				CoreServiceHandler.getInstance().getServerHandler().receivePacket(packet, handler.player);
+				ci.cancel();
+			}
 		}
 	}
 }

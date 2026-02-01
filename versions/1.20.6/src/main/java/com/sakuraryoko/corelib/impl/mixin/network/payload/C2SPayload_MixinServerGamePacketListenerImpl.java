@@ -20,8 +20,8 @@
 
 package com.sakuraryoko.corelib.impl.mixin.network.payload;
 
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.protocol.PacketUtils;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,7 +35,7 @@ import com.sakuraryoko.corelib.impl.network.announcer.CoreServiceHandler;
 import com.sakuraryoko.corelib.impl.network.announcer.CoreServicePacket;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public class MixinServerGamePacketListenerImpl_C2SPayload
+public class C2SPayload_MixinServerGamePacketListenerImpl
 {
 	@Shadow public ServerPlayer player;
 
@@ -43,10 +43,9 @@ public class MixinServerGamePacketListenerImpl_C2SPayload
 	private void corelib$handleCustomPayload(ServerboundCustomPayloadPacket packet, CallbackInfo ci)
 	{
 		if (!Reference.EXPERIMENTAL) return;
-		ResourceLocation id = ((IMixinServerboundCustomPayloadPacket) packet).corelib$getIdentifier();
-
-		if (id.equals(CoreServicePacket.PACKET_ID))
+		if (packet.payload().type().id().equals(CoreServicePacket.PACKET_ID))
 		{
+			PacketUtils.ensureRunningOnSameThread(packet, (ServerGamePacketListenerImpl) (Object) this, this.player.serverLevel());
 			CoreServiceHandler.getInstance().getServerHandler().receivePacket(packet, this.player);
 			ci.cancel();
 		}

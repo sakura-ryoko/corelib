@@ -18,7 +18,7 @@
  * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sakuraryoko.corelib.impl.mixin.network;
+package com.sakuraryoko.corelib.impl.mixin.network.payload;
 
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
@@ -35,11 +35,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import com.sakuraryoko.corelib.impl.Reference;
-import com.sakuraryoko.corelib.impl.mixin.network.payload.IMixinServerboundCustomPayloadPacket;
 import com.sakuraryoko.corelib.impl.network.announcer.CoreServicePacket;
 
 @Mixin(Connection.class)
-public class MixinConnection
+public class PayloadCommon_MixinConnection
 {
 	@Shadow private Channel channel;
 	@Shadow @Final public static AttributeKey<ConnectionProtocol> ATTRIBUTE_PROTOCOL;
@@ -68,7 +67,7 @@ public class MixinConnection
 			{
 				ServerboundCustomPayloadPacket serverPacket = (ServerboundCustomPayloadPacket) packet;
 
-				if (((IMixinServerboundCustomPayloadPacket) serverPacket).corelib$getIdentifier().equals(CoreServicePacket.PACKET_ID))
+				if (((C2SPayload_IMixinServerboundCustomPayloadPacket) serverPacket).corelib$getIdentifier().equals(CoreServicePacket.PACKET_ID))
 				{
 					return fixedProtocol;
 				}

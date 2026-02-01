@@ -20,11 +20,21 @@
 
 package com.sakuraryoko.corelib.impl.mixin.network.payload;
 
+import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 
-import com.sakuraryoko.corelib.impl.util.MixinDummy;
-
-@Mixin(MixinDummy.class)
-public class MixinServerCommonPacketListenerImpl
+@Mixin(ClientCommonPacketListenerImpl.class)
+public class S2CPayload_MixinClientCommonPacketListenerImpl
 {
+//	@Inject(method = "handleCustomPayload(Lnet/minecraft/network/protocol/common/ClientboundCustomPayloadPacket;)V",
+//	        at = @At("HEAD"), cancellable = true)
+//	private void corelib$onCustomPayload(ClientboundCustomPayloadPacket packet, CallbackInfo ci)
+//	{
+//		if (!Reference.EXPERIMENTAL) return;
+//		if (packet.payload().id().equals(CoreServicePacket.PACKET_ID))
+//		{
+//			CoreServiceHandler.getInstance().getClientHandler().receivePacket(packet);
+//			ci.cancel();
+//		}
+//	}
 }

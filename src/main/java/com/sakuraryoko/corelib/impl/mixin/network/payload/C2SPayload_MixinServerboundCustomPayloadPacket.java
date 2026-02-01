@@ -20,18 +20,11 @@
 
 package com.sakuraryoko.corelib.impl.mixin.network.payload;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
-import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ServerboundCustomPayloadPacket.class)
-public interface IMixinServerboundCustomPayloadPacket
+import com.sakuraryoko.corelib.impl.util.MixinDummy;
+
+@Mixin(MixinDummy.class)
+public class C2SPayload_MixinServerboundCustomPayloadPacket
 {
-	@Accessor("identifier")
-	ResourceLocation corelib$getIdentifier();
-
-	@Accessor("data")
-	FriendlyByteBuf corelib$getData();
 }

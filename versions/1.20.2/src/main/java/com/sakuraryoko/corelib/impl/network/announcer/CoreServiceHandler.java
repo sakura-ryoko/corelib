@@ -22,6 +22,7 @@ package com.sakuraryoko.corelib.impl.network.announcer;
 
 import java.util.UUID;
 
+import net.minecraft.network.Connection;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
@@ -80,6 +81,16 @@ public class CoreServiceHandler
 			return CoreServicePacket.PACKET_ID;
 		}
 
+		public void sendAsPayload(CoreServicePacket packet, ServerPlayer player)
+		{
+			this.sendPacket(new ClientboundCustomPayloadPacket(new CoreServicePacket.Payload(packet)), player);
+		}
+
+		public void sendAsPayload(CoreServicePacket packet, Connection connection)
+		{
+			connection.send(new ClientboundCustomPayloadPacket(new CoreServicePacket.Payload(packet)));
+		}
+
 		@Override
 		public <T extends PacketListener> void receivePacket(Packet<T> packet, ServerPlayer player)
 		{
@@ -100,6 +111,16 @@ public class CoreServiceHandler
 		public ResourceLocation getPacketId()
 		{
 			return CoreServicePacket.PACKET_ID;
+		}
+
+		public void sendAsPayload(CoreServicePacket packet)
+		{
+			this.sendPacket(new ServerboundCustomPayloadPacket(new CoreServicePacket.Payload(packet)));
+		}
+
+		public void sendAsPayload(CoreServicePacket packet, Connection connection)
+		{
+			connection.send(new ServerboundCustomPayloadPacket(new CoreServicePacket.Payload(packet)));
 		}
 
 		@Override

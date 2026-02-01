@@ -20,10 +20,11 @@
 
 package com.sakuraryoko.corelib.impl.mixin.network.payload;
 
-import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(ClientboundCustomPayloadPacket.class)
-public interface IMixinClientboundCustomPayloadPacket
+import com.sakuraryoko.corelib.impl.util.MixinDummy;
+
+@Mixin(MixinDummy.class)
+public class S2CPayload_MixinClientCommonPacketListenerImpl
 {
 }

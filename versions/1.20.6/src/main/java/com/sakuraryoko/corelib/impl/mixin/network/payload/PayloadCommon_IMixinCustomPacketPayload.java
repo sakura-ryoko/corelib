@@ -38,7 +38,7 @@ import com.sakuraryoko.corelib.impl.network.announcer.CoreServicePacket;
  * Copied from Carpet Mod.
  */
 @Mixin(CustomPacketPayload.class)
-public interface IMixinCustomPacketPayload
+public interface PayloadCommon_IMixinCustomPacketPayload
 {
 	@Inject(method = "codec(Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload$FallbackProvider;Ljava/util/List;)Lnet/minecraft/network/codec/StreamCodec;",
 	        at = @At("HEAD"), cancellable = true)

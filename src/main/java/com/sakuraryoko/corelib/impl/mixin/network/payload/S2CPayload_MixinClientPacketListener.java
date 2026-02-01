@@ -20,9 +20,12 @@
 
 package com.sakuraryoko.corelib.impl.mixin.network.payload;
 
-import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.PacketUtils;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -31,15 +34,18 @@ import com.sakuraryoko.corelib.impl.Reference;
 import com.sakuraryoko.corelib.impl.network.announcer.CoreServiceHandler;
 import com.sakuraryoko.corelib.impl.network.announcer.CoreServicePacket;
 
-@Mixin(ClientCommonPacketListenerImpl.class)
-public class MixinClientCommonPacketListenerImpl
+@Mixin(ClientPacketListener.class)
+public class S2CPayload_MixinClientPacketListener
 {
-	@Inject(method = "handleCustomPayload(Lnet/minecraft/network/protocol/common/ClientboundCustomPayloadPacket;)V",
-	        at = @At("HEAD"), cancellable = true)
+	@Shadow private Minecraft minecraft;
+
+	@Inject(method = "handleCustomPayload", at = @At("HEAD"), cancellable = true)
 	private void corelib$onCustomPayload(ClientboundCustomPayloadPacket packet, CallbackInfo ci)
 	{
 		if (!Reference.EXPERIMENTAL) return;
-		if (packet.payload().id().equals(CoreServicePacket.PACKET_ID))
+		PacketUtils.ensureRunningOnSameThread(packet, (ClientPacketListener) (Object) this, this.minecraft);
+
+		if (packet.getIdentifier().equals(CoreServicePacket.PACKET_ID))
 		{
 			CoreServiceHandler.getInstance().getClientHandler().receivePacket(packet);
 			ci.cancel();

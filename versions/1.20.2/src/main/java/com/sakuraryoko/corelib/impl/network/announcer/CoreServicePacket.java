@@ -24,6 +24,7 @@ import java.util.UUID;
 import org.jspecify.annotations.NonNull;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
 import com.sakuraryoko.corelib.impl.Reference;

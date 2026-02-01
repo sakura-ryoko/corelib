@@ -44,6 +44,7 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.dimension.DimensionType;
 //#endif
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -52,7 +53,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.sakuraryoko.corelib.impl.Reference;
 import com.sakuraryoko.corelib.impl.events.players.PlayerEventsManager;
 import com.sakuraryoko.corelib.impl.network.announcer.CoreServiceHandler;
-import com.sakuraryoko.corelib.impl.network.announcer.CoreServicePacket;
 
 @Mixin(PlayerList.class)
 public abstract class MixinPlayerList
@@ -111,6 +111,7 @@ public abstract class MixinPlayerList
     //$$ private void corelib$onPlaceNewPlayerPost(Connection connection, ServerPlayer serverPlayer, CommonListenerCookie commonListenerCookie, CallbackInfo ci)
     //$$ {
         //$$ ((PlayerEventsManager) PlayerEventsManager.getInstance()).onPlayerJoinPost(serverPlayer, connection);
+        //$$ this.sendAnnouncerPacket(connection, serverPlayer);
     //$$ }
 
     //#else
@@ -124,18 +125,18 @@ public abstract class MixinPlayerList
     private void corelib$onPlaceNewPlayerPost(Connection connection, ServerPlayer serverPlayer, CallbackInfo ci)
     {
         ((PlayerEventsManager) PlayerEventsManager.getInstance()).onPlayerJoinPost(serverPlayer, connection);
-
-        if (Reference.EXPERIMENTAL)
-        {
-            CoreServiceHandler.getInstance().getServerHandler().sendPacket(
-                    CoreServicePacket.S2CPayload.fromPacket(
-                            CoreServiceHandler.getInstance().createHelloPacket()
-                    ),
-                    serverPlayer
-            );
-        }
+        this.sendAnnouncerPacket(connection, serverPlayer);
     }
     //#endif
+
+    @Unique
+    private void sendAnnouncerPacket(Connection connection, ServerPlayer serverPlayer)
+    {
+        if (Reference.EXPERIMENTAL)
+        {
+            CoreServiceHandler.getInstance().getServerHandler().sendAsPayload(CoreServiceHandler.getInstance().createHelloPacket(), connection);
+        }
+    }
 
     // respawnPlayer
     @Inject(method = "respawn", at = @At("RETURN"))

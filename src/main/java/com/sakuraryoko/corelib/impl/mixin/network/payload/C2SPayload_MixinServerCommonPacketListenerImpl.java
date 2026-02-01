@@ -2,7 +2,7 @@
  * This file is part of the CoreLib project, licensed under the
  * GNU Lesser General Public License v3.0
  *
- * Copyright (C) 2025  Sakura Ryoko and contributors
+ * Copyright (C) 2026  Sakura Ryoko and contributors
  *
  * CoreLib is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,12 +18,13 @@
  * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sakuraryoko.corelib.impl.mixin.network;
+package com.sakuraryoko.corelib.impl.mixin.network.payload;
 
 import org.spongepowered.asm.mixin.Mixin;
 
 import com.sakuraryoko.corelib.impl.util.MixinDummy;
+
 @Mixin(MixinDummy.class)
-public class MixinServerConfigurationPacketListenerImpl
+public class C2SPayload_MixinServerCommonPacketListenerImpl
 {
 }

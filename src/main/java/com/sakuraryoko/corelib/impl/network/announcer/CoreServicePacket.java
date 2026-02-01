@@ -30,7 +30,7 @@ import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 
 import com.sakuraryoko.corelib.impl.Reference;
-import com.sakuraryoko.corelib.impl.mixin.network.payload.IMixinServerboundCustomPayloadPacket;
+import com.sakuraryoko.corelib.impl.mixin.network.payload.C2SPayload_IMixinServerboundCustomPayloadPacket;
 
 public class CoreServicePacket
 {
@@ -123,7 +123,7 @@ public class CoreServicePacket
 
 		public CoreServicePacket toPacket()
 		{
-			return CoreServicePacket.fromByteBuf(((IMixinServerboundCustomPayloadPacket) this).corelib$getData());
+			return CoreServicePacket.fromByteBuf(((C2SPayload_IMixinServerboundCustomPayloadPacket) this).corelib$getData());
 		}
 	}
 

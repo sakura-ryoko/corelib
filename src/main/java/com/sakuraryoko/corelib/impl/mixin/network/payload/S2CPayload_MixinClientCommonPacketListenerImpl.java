@@ -18,13 +18,13 @@
  * along with CoreLib.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sakuraryoko.corelib.impl.mixin.network;
+package com.sakuraryoko.corelib.impl.mixin.network.payload;
 
 import org.spongepowered.asm.mixin.Mixin;
 
 import com.sakuraryoko.corelib.impl.util.MixinDummy;
 
 @Mixin(MixinDummy.class)
-public class MixinConnection
+public class S2CPayload_MixinClientCommonPacketListenerImpl
 {
 }

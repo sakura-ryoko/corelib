@@ -20,12 +20,11 @@
 
 package com.sakuraryoko.corelib.impl.mixin.network.payload;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.PacketUtils;
-import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -34,21 +33,22 @@ import com.sakuraryoko.corelib.impl.Reference;
 import com.sakuraryoko.corelib.impl.network.announcer.CoreServiceHandler;
 import com.sakuraryoko.corelib.impl.network.announcer.CoreServicePacket;
 
-@Mixin(ClientPacketListener.class)
-public class MixinClientPacketListener_S2CPayload
+@Mixin(ServerCommonPacketListenerImpl.class)
+public abstract class C2SPayload_MixinServerCommonPacketListenerImpl
 {
-	@Shadow private Minecraft minecraft;
-
 	@Inject(method = "handleCustomPayload", at = @At("HEAD"), cancellable = true)
-	private void corelib$onCustomPayload(ClientboundCustomPayloadPacket packet, CallbackInfo ci)
+	private void corelib$handleCustomPayload(ServerboundCustomPayloadPacket packet, CallbackInfo ci)
 	{
 		if (!Reference.EXPERIMENTAL) return;
-		PacketUtils.ensureRunningOnSameThread(packet, (ClientPacketListener) (Object) this, this.minecraft);
-
-		if (packet.getIdentifier().equals(CoreServicePacket.PACKET_ID))
+		if ((ServerCommonPacketListenerImpl) (Object) this instanceof ServerGamePacketListenerImpl)
 		{
-			CoreServiceHandler.getInstance().getClientHandler().receivePacket(packet);
-			ci.cancel();
+			if (packet.payload() instanceof CoreServicePacket.Payload)
+			{
+				ServerGamePacketListenerImpl handler = (ServerGamePacketListenerImpl) (Object) this;
+				PacketUtils.ensureRunningOnSameThread(packet, handler, handler.player.serverLevel());
+				CoreServiceHandler.getInstance().getServerHandler().receivePacket(packet, handler.player);
+				ci.cancel();
+			}
 		}
 	}
 }

@@ -20,29 +20,29 @@
 
 package com.sakuraryoko.corelib.impl.mixin.network.payload;
 
-import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.sakuraryoko.corelib.impl.Reference;
-import com.sakuraryoko.corelib.impl.network.announcer.CoreServiceHandler;
 import com.sakuraryoko.corelib.impl.network.announcer.CoreServicePacket;
 
-@Mixin(ClientPacketListener.class)
-public class MixinClientPacketListener_S2CPayload
+@Mixin(ClientboundCustomPayloadPacket.class)
+public class S2CPayload_MixinClientboundCustomPayloadPacket
 {
-	@Inject(method = "handleCustomPayload", at = @At("HEAD"), cancellable = true)
-	private void corelib$onCustomPayload(CustomPacketPayload payload, CallbackInfo ci)
+	@Inject(method = "readPayload",
+	        at = @At(value = "INVOKE",
+	                 target = "Lnet/minecraft/network/protocol/common/ClientboundCustomPayloadPacket;readUnknownPayload(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/network/FriendlyByteBuf;)Lnet/minecraft/network/protocol/common/custom/DiscardedPayload;"), cancellable = true)
+	private static void corelib$onReadPayloadS2C(ResourceLocation id, FriendlyByteBuf buffer, CallbackInfoReturnable<CustomPacketPayload> cir)
 	{
-		if (!Reference.EXPERIMENTAL) return;
-		if (payload.id().equals(CoreServicePacket.PACKET_ID))
+		if (Reference.EXPERIMENTAL && id.equals(CoreServicePacket.PACKET_ID))
 		{
-			CoreServiceHandler.getInstance().getClientHandler().receivePacket(new ClientboundCustomPayloadPacket(payload));
-			ci.cancel();
+			cir.setReturnValue(new CoreServicePacket.Payload(CoreServicePacket.fromByteBuf(buffer)));
 		}
 	}
 }
