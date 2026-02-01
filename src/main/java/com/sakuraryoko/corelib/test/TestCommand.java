@@ -37,7 +37,7 @@ import static net.minecraft.commands.Commands.literal;
 import com.sakuraryoko.corelib.api.commands.IServerCommand;
 import com.sakuraryoko.corelib.api.log.AnsiLogger;
 import com.sakuraryoko.corelib.api.modinit.ModInitData;
-import com.sakuraryoko.corelib.impl.modinit.CoreInit;
+import com.sakuraryoko.corelib.impl.core.modinit.CoreInit;
 
 public class TestCommand implements IServerCommand
 {

@@ -20,20 +20,55 @@
 
 package com.sakuraryoko.corelib.api.log;
 
+import com.sakuraryoko.corelib.impl.Reference;
+
 public class AnsiLogger implements IAnsiLogger
 {
     private final String log;
-    private final boolean debug;
+    private boolean debug;
+    private boolean ansiColor;
 
     public AnsiLogger(Class<?> clazz)
     {
-        this(clazz, false);
+        this(clazz, false, false);
     }
 
     public AnsiLogger(Class<?> clazz, boolean debug)
     {
+        this(clazz, debug, false);
+    }
+
+    public AnsiLogger(Class<?> clazz, boolean debug, boolean ansiColor)
+    {
         this.log = clazz.getName();
         this.debug = debug;
+        this.ansiColor = ansiColor;
+        this.checkReference();
+    }
+
+    private void checkReference()
+    {
+        if (!this.debug && Reference.DEBUG)
+        {
+            this.debug = true;
+        }
+
+        if (!this.ansiColor && Reference.ANSI_COLOR)
+        {
+            this.ansiColor = true;
+        }
+    }
+
+    @Override
+    public void toggleDebug(boolean toggle)
+    {
+        this.debug = toggle;
+    }
+
+    @Override
+    public void toggleAnsiColor(boolean toggle)
+    {
+        this.ansiColor = toggle;
     }
 
     @Override
@@ -42,7 +77,15 @@ public class AnsiLogger implements IAnsiLogger
         if (this.log != null)
         {
             String msg = this.format(fmt, args);
-            System.out.printf(AnsiColors.WHITE + "[INFO/"+this.log+"]: %s" + AnsiColors.RESET+"\n", msg);
+
+            if (this.ansiColor)
+            {
+                System.out.printf(AnsiColors.WHITE + "[INFO/" + this.log + "]: %s" + AnsiColors.RESET + "\n", msg);
+            }
+            else
+            {
+                System.out.printf("[INFO/" + this.log + "]: %s\n", msg);
+            }
         }
     }
 
@@ -52,7 +95,15 @@ public class AnsiLogger implements IAnsiLogger
         if (this.log != null && this.debug)
         {
             String msg = this.format(fmt, args);
-            System.out.printf(AnsiColors.PURPLE_BOLD + "[DEBUG/"+this.log+"]: %s" + AnsiColors.RESET+"\n", msg);
+
+            if (this.ansiColor)
+            {
+                System.out.printf(AnsiColors.PURPLE_BOLD + "[DEBUG/" + this.log + "]: %s" + AnsiColors.RESET + "\n", msg);
+            }
+            else
+            {
+                System.out.printf("[DEBUG/" + this.log + "]: %s\n", msg);
+            }
         }
     }
 
@@ -62,7 +113,15 @@ public class AnsiLogger implements IAnsiLogger
         if (this.log != null)
         {
             String msg = this.format(fmt, args);
-            System.out.printf(AnsiColors.YELLOW_BOLD + "[WARN/"+this.log+"]: %s" + AnsiColors.RESET+"\n", msg);
+
+            if (this.ansiColor)
+            {
+                System.out.printf(AnsiColors.YELLOW_BOLD + "[WARN/" + this.log + "]: %s" + AnsiColors.RESET + "\n", msg);
+            }
+            else
+            {
+                System.out.printf("[WARN/" + this.log + "]: %s\n", msg);
+            }
         }
     }
 
@@ -72,7 +131,15 @@ public class AnsiLogger implements IAnsiLogger
         if (this.log != null)
         {
             String msg = this.format(fmt, args);
-            System.out.printf(AnsiColors.RED_BOLD + "[ERROR/"+this.log+"]: %s" + AnsiColors.RESET+"\n", msg);
+
+            if (this.ansiColor)
+            {
+                System.out.printf(AnsiColors.RED_BOLD + "[ERROR/" + this.log + "]: %s" + AnsiColors.RESET + "\n", msg);
+            }
+            else
+            {
+                System.out.printf("[ERROR/" + this.log + "]: %s\n", msg);
+            }
         }
     }
 
@@ -82,7 +149,15 @@ public class AnsiLogger implements IAnsiLogger
         if (this.log != null)
         {
             String msg = this.format(fmt, args);
-            System.out.printf(AnsiColors.RED_BOLD_BRIGHT + "[FATAL/"+this.log+"]: %s" + AnsiColors.RESET+"\n", msg);
+
+            if (this.ansiColor)
+            {
+                System.out.printf(AnsiColors.RED_BOLD_BRIGHT + "[FATAL/" + this.log + "]: %s" + AnsiColors.RESET + "\n", msg);
+            }
+            else
+            {
+                System.out.printf("[FATAL/" + this.log + "]: %s\n", msg);
+            }
         }
     }
 }

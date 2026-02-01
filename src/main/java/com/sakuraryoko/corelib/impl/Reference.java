@@ -24,18 +24,34 @@ import java.nio.file.Path;
 import org.jetbrains.annotations.ApiStatus;
 
 import net.minecraft.SharedConstants;
-import net.fabricmc.loader.api.FabricLoader;
 
 @ApiStatus.Internal
 public class Reference
 {
-	public static final Path GAME_DIR = FabricLoader.getInstance().getGameDir();
-    public static final Path CONFIG_DIR = FabricLoader.getInstance().getConfigDir();
+	public static final Path GAME_DIR = FabricReference.GAME_DIR;
+    public static final Path CONFIG_DIR = FabricReference.CONFIG_DIR;
     public static final String MOD_ID = "corelib";
 	//#if MC >= 12106
 	//$$ public static final String MC_VERSION = SharedConstants.getCurrentVersion().name();
 	//#else
 	public static final String MC_VERSION = SharedConstants.getCurrentVersion().getName();
 	//#endif
-    public static final boolean DEBUG = false;
+
+	private static final boolean LOCAL_DEBUG = false;
+	private static final boolean LOCAL_ANSI_COLOR = false;
+	public static final boolean EXPERIMENTAL = false;
+
+    public static boolean DEBUG = isDebug();
+	public static boolean RUNNING_IN_IDE = FabricReference.RUNNING_IN_IDE;
+	public static boolean ANSI_COLOR = isAnsiColor();
+
+	private static boolean isDebug()
+	{
+		return LOCAL_DEBUG || RUNNING_IN_IDE;
+	}
+
+	private static boolean isAnsiColor()
+	{
+		return (DEBUG && RUNNING_IN_IDE) || LOCAL_ANSI_COLOR;
+	}
 }

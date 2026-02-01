@@ -24,7 +24,7 @@ import com.sakuraryoko.corelib.api.config.IConfigData;
 import com.sakuraryoko.corelib.api.config.IConfigDispatch;
 import com.sakuraryoko.corelib.api.log.AnsiLogger;
 import com.sakuraryoko.corelib.api.time.TimeFormat;
-import com.sakuraryoko.corelib.impl.modinit.CoreInit;
+import com.sakuraryoko.corelib.impl.core.modinit.CoreInit;
 
 public class TestConfigHandler implements IConfigDispatch
 {

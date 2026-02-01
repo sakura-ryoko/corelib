@@ -45,6 +45,7 @@ public class CoreLib implements ModInitializer
     @Override
     public void onInitialize()
     {
+        FabricReference.onInitialize();
         if (Reference.DEBUG)
         {
             ModInitManager.getInstance().registerModInitHandler(new TestInit());

@@ -34,6 +34,10 @@ public interface IAnsiLogger
         return result;
     }
 
+    void toggleDebug(boolean toggle);
+
+    void toggleAnsiColor(boolean toggle);
+
     void info(String fmt, Object... args);
 
     void debug(String fmt, Object... args);

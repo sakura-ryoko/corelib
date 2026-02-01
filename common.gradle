@@ -1,23 +1,28 @@
+final int mcVersion = project.mcVersion
+final boolean unobfuscated = mcVersion >= 26_00_00
+
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.hierynomus.license'
-apply plugin: 'fabric-loom'
+apply plugin: unobfuscated ? 'net.fabricmc.fabric-loom' : 'net.fabricmc.fabric-loom-remap'
 apply plugin: 'com.replaymod.preprocess'
-
-int mcVersion = project.mcVersion
+//apply plugin: 'me.fallenbreath.yamlang'
 
 repositories {
-    maven {
-        url = 'https://maven.parchmentmc.org'
+    maven {url = 'https://maven.parchmentmc.org'
+		content { includeGroupAndSubgroups("org.parchmentmc.data") }
     }
-	maven {
-		url = 'https://jitpack.io'
+	maven {url = 'https://maven.fallenbreath.me/releases'
+		content { includeGroupAndSubgroups("me.fallenbreath") }
 	}
-	maven {
-		url = 'https://maven.fallenbreath.me/releases'
+	maven { url = 'https://maven.terraformersmc.com/releases/'
+		content { includeGroupAndSubgroups("com.terraformersmc") }
 	}
-//	maven {
-//		url = "https://maven.nucleoid.xyz/"
+//	maven { url = 'https://maven.nucleoid.xyz'
+//		content { includeGroupAndSubgroups("eu.pb4") }
 //	}
+	maven { url = 'https://jitpack.io'
+		content { includeGroupAndSubgroups('com.github') }
+	}
 }
 
 // https://github.com/FabricMC/fabric-loader/issues/783
@@ -26,51 +31,78 @@ configurations {
 }
 
 dependencies {
+	def processDependency = { dep ->
+		// https://github.com/FabricMC/fabric-loader/issues/783
+		if (dep instanceof ModuleDependency) {
+			if (!(dep.group == 'net.fabricmc' && dep.name == 'fabric-loader')) {
+				dep.exclude group: 'net.fabricmc', module: 'fabric-loader'
+			}
+		}
+		return dep
+	}
+	def autoImplementation = { Object... args -> processDependency(unobfuscated ? implementation(*args) : modImplementation(*args)) }
+	def autoRuntimeOnly = { Object... args -> processDependency(unobfuscated ? runtimeOnly(*args) : modRuntimeOnly(*args)) }
+	def autoCompileOnly = { Object... args -> processDependency(unobfuscated ? compileOnly(*args) : modCompileOnly(*args)) }
+
 	// loom
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	//mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    mappings loom.layered() {
-        officialMojangMappings()
-        if (project.parchment_version.size() > 0) {
-            parchment("org.parchmentmc.data:parchment-${project.minecraft_version}:${project.parchment_version}@zip")
-        }
-    }
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	if (!unobfuscated) {
+		mappings loom.layered() {
+			officialMojangMappings()
+			if (project.parchment_version.size() > 0) {
+				parchment("org.parchmentmc.data:parchment-${project.minecraft_version}:${project.parchment_version}@zip")
+			}
+		}
+	}
+	autoImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	// debuggers
+	autoImplementation "org.jspecify:jspecify:1.0.0"
+	autoImplementation "com.google.code.findbugs:jsr305:3.0.2"
 
 	// External Dependencies
-	implementation "com.google.code.gson:gson:${project.gson_version}"
-	implementation "com.google.code.findbugs:jsr305:3.0.2"
+	autoImplementation "com.google.code.gson:gson:${project.gson_version}"
+	autoImplementation "com.opencsv:opencsv:${project.opencsv_version}"
 
 	// runtime mods
 //	if (mcVersion < 11904) {
-//		modRuntimeOnly(mcVersion < 11900 ? "com.github.astei:lazydfu:0.1.2" : "com.github.Fallen-Breath:lazydfu:a7cfc44c0c")
+//		autoRuntimeOnly(mcVersion < 11900 ? "com.github.astei:lazydfu:0.1.2" : "com.github.Fallen-Breath:lazydfu:a7cfc44c0c")
 //	}
 	// [FEATURE] MIXIN_AUDITOR
-//	modRuntimeOnly 'me.fallenbreath:mixin-auditor:0.1.0'
+//	autoRuntimeOnly "me.fallenbreath:mixin-auditor:0.2.0-${unobfuscated ? 'u' : 'o'}"
 
 	// dependencies
-//	def fabricApiModules = ["fabric-resource-loader-v0"]
-//	if (mcVersion >= 12105) {  // "fabric-resource-loader-v0" dependency since fabric api 0.127.0
+//	def fabricApiModules = []
+//	if (mcVersion >= 12105) {  // "fabric-resource-loader-v0" dependency since fabric api 0.117.0 (25w07a, mc1.21.5 snapshot)
 //		fabricApiModules.add("fabric-api-base")
 //	}
-//	fabricApiModules.forEach {
-//	    include(modImplementation(fabricApi.module(it, project.fabric_api_version)))
+//	if (mcVersion < 12111) {  // "fabric-resource-loader" is fully moved from v0 to v1 since fabric api 0.139.3 (1.21.11-pre4)
+//		fabricApiModules.add("fabric-resource-loader-v0")
 //	}
-    //include(modApi(fabricApi.module("fabric-api-base", project.fabric_api_version)))
-	//modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-	//include(modImplementation("me.fallenbreath:conditional-mixin-fabric:${project.conditionalmixin_version}"))
+//	if (mcVersion >= 12109) {  // "fabric-resource-loader-v0" dependency since fabric api 0.133.11 (1.21.9-rc1)
+//		fabricApiModules.add("fabric-resource-loader-v1")
+//	}
+//	fabricApiModules.forEach {
+//		include(autoImplementation(fabricApi.module(it, project.fabric_api_version)))
+//	}
+	include(autoImplementation("me.fallenbreath:conditional-mixin-fabric:${project.conditionalmixin_version}"))
     if (mcVersion < 12005) {
 		include("io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}")
 	}
 
+	// modmenu
+//	autoCompileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
+
 	// CoreLib Specific
-	//modImplementation include("me.lucko:fabric-permissions-api:${project.fabric_permissions_api_version}")
-	//modImplementation "eu.pb4:placeholder-api:${project.placeholder_api_version}"
+	//autoImplementation include("me.lucko:fabric-permissions-api:${project.fabric_permissions_api_version}")
+	//autoImplementation "eu.pb4:placeholder-api:${project.placeholder_api_version}"
 }
 
 String MIXIN_CONFIG_PATH = 'corelib.mixins.json'
 JavaVersion JAVA_COMPATIBILITY
-if (mcVersion >= 12005) {
+if (mcVersion >= 260000) {
+	JAVA_COMPATIBILITY = JavaVersion.VERSION_25
+} else if (mcVersion >= 12005) {
 	JAVA_COMPATIBILITY = JavaVersion.VERSION_21
 } else if (mcVersion >= 11800) {
 	JAVA_COMPATIBILITY = JavaVersion.VERSION_17
@@ -82,7 +114,8 @@ if (mcVersion >= 12005) {
 JavaVersion MIXIN_COMPATIBILITY_LEVEL = JAVA_COMPATIBILITY
 
 loom {
-	def commonVmArgs = ['-Dmixin.debug.export=true', '-Dmixin.debug.countInjections=true']
+	// '--sun-misc-unsafe-memory-access=allow','--enable-native-access=ALL-UNNAMED'
+	def commonVmArgs = ['-Dmixin.debug.export=true','-Dmixin.debug.countInjections=true']
 	runConfigs.configureEach {
 		// to make sure it generates all "Minecraft Client (:subproject_name)" applications
 		ideConfigGenerated = true
@@ -103,6 +136,8 @@ loom {
 //            ideConfigGenerated false
 //        }
 //	}
+
+	accessWidenerPath = file("src/main/resources/corelib.accesswidener")
 }
 
 String modVersionSuffix = ''
@@ -142,19 +177,16 @@ version = fullProjectVersion
 // See https://youtrack.jetbrains.com/issue/IDEA-296490
 // if IDEA complains about "Cannot resolve resource filtering of MatchingCopyAction" and you want to know why
 processResources {
-	inputs.property "id", project.mod_id
-	inputs.property "name", project.mod_name
-	inputs.property "version", fullModVersion
-	inputs.property "minecraft_dependency", project.minecraft_dependency
+	def modProperties = [
+			"id"                  : project.mod_id,
+			"name"                : project.mod_name,
+			"version"             : fullModVersion,
+			"minecraft_dependency": project.minecraft_dependency,
+	]
+	inputs.properties(modProperties)
 
 	filesMatching("fabric.mod.json") {
-		def valueMap = [
-				"id": project.mod_id,
-				"name": project.mod_name,
-				"version": fullModVersion,
-				"minecraft_dependency": project.minecraft_dependency,
-		]
-		expand valueMap
+		expand modProperties
 	}
 
 	filesMatching(MIXIN_CONFIG_PATH) {
@@ -185,8 +217,9 @@ java {
 }
 
 jar {
+	inputs.property "archives_base_name", project.archives_base_name
 	from(rootProject.file('LICENSE')) {
-		rename { "${it}_${project.archives_base_name}" }
+		rename { "${it}_${inputs.properties.archives_base_name}" }
 	}
 }
 
@@ -231,13 +264,16 @@ publishing {
 		mavenJava(MavenPublication) {
 			from components.java
 			artifactId = base.archivesName.get()
-            version = fullArtifactVersion
+			version = fullArtifactVersion
 		}
 	}
 
 	// select the repositories you want to publish to
 	repositories {
 		// mavenLocal()
+		maven {
+			url = "$projectDir/../../CommonMaven"
+		}
 
 //		// [FEATURE] FALLENS_MAVEN
 //		maven {

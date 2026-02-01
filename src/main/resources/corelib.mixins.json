@@ -4,17 +4,25 @@
     "package": "com.sakuraryoko.corelib.impl.mixin",
     "compatibilityLevel": "{{COMPATIBILITY_LEVEL}}",
     "mixins": [
-        "MixinCommands",
-        "MixinDedicatedServer",
-        "MixinMinecraftServer",
-        "MixinPlayerList",
         "MixinPrepareSpawnTask",
-        "MixinServerConfigurationPacketListenerImpl"
+        "network.MixinConnection",
+        "network.MixinServerConfigurationPacketListenerImpl",
+        "network.payload.IMixinClientboundCustomPayloadPacket",
+        "network.payload.IMixinCustomPacketPayload",
+        "network.payload.IMixinServerboundCustomPayloadPacket",
+        "network.payload.MixinClientCommonPacketListenerImpl",
+        "network.payload.MixinServerCommonPacketListenerImpl",
+        "network.payload.MixinServerGamePacketListenerImpl_C2SPayload",
+        "server.MixinCommands",
+        "server.MixinDedicatedServer",
+        "server.MixinMinecraftServer",
+        "server.MixinPlayerList"
     ],
     "client": [
-        "MixinClientPacketListener",
-        "MixinIntegratedServer",
-        "MixinMinecraft"
+        "client.MixinMinecraft",
+        "network.MixinClientPacketListener",
+        "network.payload.MixinClientPacketListener_S2CPayload",
+        "server.MixinIntegratedServer"
     ],
     "server": [],
     "injectors": {

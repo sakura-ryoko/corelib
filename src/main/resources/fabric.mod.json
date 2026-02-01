@@ -9,7 +9,7 @@
     "sakura-ryoko"
   ],
   "contact": {
-    "homepage": "https://github.com/sakura-ryoko/corelib",
+    "homepage": "https://modrinth.com/mod/core-lib-api",
     "sources": "https://github.com/sakura-ryoko/corelib",
     "issues": "https://github.com/sakura-ryoko/corelib/issues"
   },
@@ -25,6 +25,7 @@
   "mixins": [
       "corelib.mixins.json"
   ],
+  "accessWidener": "corelib.accesswidener",
 
   "depends": {
     "fabricloader": ">=0.11.4",
