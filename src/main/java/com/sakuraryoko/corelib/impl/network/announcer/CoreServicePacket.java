@@ -29,16 +29,18 @@ import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 
+import com.sakuraryoko.corelib.api.network.packet.INetworkPacket;
+import com.sakuraryoko.corelib.api.network.payload.INetworkPayload;
 import com.sakuraryoko.corelib.impl.Reference;
-import com.sakuraryoko.corelib.impl.mixin.network.payload.C2SPayload_IMixinServerboundCustomPayloadPacket;
+import com.sakuraryoko.corelib.impl.mixin.network.c2s.IMixinServerboundCustomPayloadPacket_customPayload;
 
-public class CoreServicePacket
+public class CoreServicePacket implements INetworkPacket<CoreServicePacket.C2SPayload, CoreServicePacket.S2CPayload>
 {
 	public static final ResourceLocation PACKET_ID = new ResourceLocation(Reference.MOD_ID, "network_service");
-	private final String serviceName;
-	private final String serviceAddress;
-	private final int servicePort;
-	private final UUID serviceUUID;
+	private String serviceName;
+	private String serviceAddress;
+	private int servicePort;
+	private UUID serviceUUID;
 
 	public CoreServicePacket(String name, String address, int port, UUID uuid)
 	{
@@ -46,6 +48,11 @@ public class CoreServicePacket
 		this.serviceAddress = address;
 		this.servicePort = port;
 		this.serviceUUID = uuid;
+	}
+
+	private CoreServicePacket(FriendlyByteBuf buf)
+	{
+		this.fromByteBuf(buf);
 	}
 
 	public String getServiceName()
@@ -68,6 +75,26 @@ public class CoreServicePacket
 		return this.serviceUUID;
 	}
 
+	private void setServiceName(String serviceName)
+	{
+		this.serviceName = serviceName;
+	}
+
+	private void setServiceAddress(String serviceAddress)
+	{
+		this.serviceAddress = serviceAddress;
+	}
+
+	private void setServicePort(int servicePort)
+	{
+		this.servicePort = servicePort;
+	}
+
+	private void setServiceUUID(UUID serviceUUID)
+	{
+		this.serviceUUID = serviceUUID;
+	}
+
 	@Override
 	public String toString()
 	{
@@ -82,6 +109,7 @@ public class CoreServicePacket
 				+ "]";
 	}
 
+	@Override
 	public FriendlyByteBuf toByteBuf()
 	{
 		FriendlyByteBuf packet = new FriendlyByteBuf(Unpooled.buffer());
@@ -94,17 +122,53 @@ public class CoreServicePacket
 		return packet;
 	}
 
-	public static CoreServicePacket fromByteBuf(FriendlyByteBuf packet)
+	@Override
+	public C2SPayload toC2SPacket()
 	{
-		String name = packet.readUtf();
-		String address = packet.readUtf();
-		int port = packet.readInt();
-		UUID uuid = packet.readUUID();
+		return (C2SPayload) C2SPayload.fromPacket(this);
+	}
 
-		return new CoreServicePacket(name, address, port, uuid);
+	@Override
+	public S2CPayload toS2CPacket()
+	{
+		return (S2CPayload) S2CPayload.fromPacket(this);
+	}
+
+	@Override
+	public ServerboundCustomPayloadPacket asServerBound()
+	{
+		return this.toC2SPacket();
+	}
+
+	@Override
+	public ClientboundCustomPayloadPacket asClientBound()
+	{
+		return this.toS2CPacket();
+	}
+
+	@Override
+	public void fromByteBuf(FriendlyByteBuf packet)
+	{
+		this.setServiceName(packet.readUtf());
+		this.setServiceAddress(packet.readUtf());
+		this.setServicePort(packet.readInt());
+		this.setServiceUUID(packet.readUUID());
+	}
+
+	@Override
+	public CoreServicePacket fromC2SPacket(C2SPayload packet)
+	{
+		return packet.toPacket();
+	}
+
+	@Override
+	public CoreServicePacket fromS2CPacket(S2CPayload packet)
+	{
+		return packet.toPacket();
 	}
 
 	public static class C2SPayload extends ServerboundCustomPayloadPacket
+			implements INetworkPayload<FriendlyByteBuf, CoreServicePacket.C2SPayload>
 	{
 		public C2SPayload(FriendlyByteBuf friendlyByteBuf)
 		{
@@ -123,11 +187,24 @@ public class CoreServicePacket
 
 		public CoreServicePacket toPacket()
 		{
-			return CoreServicePacket.fromByteBuf(((C2SPayload_IMixinServerboundCustomPayloadPacket) this).corelib$getData());
+			return new CoreServicePacket(((IMixinServerboundCustomPayloadPacket_customPayload) this).corelib$getData());
+		}
+
+		@Override
+		public ResourceLocation getPacketId()
+		{
+			return PACKET_ID;
+		}
+
+		@Override
+		public C2SPayload fromByteBuf(FriendlyByteBuf buffer)
+		{
+			return new C2SPayload(buffer);
 		}
 	}
 
 	public static class S2CPayload extends ClientboundCustomPayloadPacket
+			implements INetworkPayload<FriendlyByteBuf, CoreServicePacket.S2CPayload>
 	{
 		public S2CPayload(FriendlyByteBuf friendlyByteBuf)
 		{
@@ -146,7 +223,19 @@ public class CoreServicePacket
 
 		public CoreServicePacket toPacket()
 		{
-			return CoreServicePacket.fromByteBuf(this.getData());
+			return new CoreServicePacket(this.getData());
+		}
+
+		@Override
+		public ResourceLocation getPacketId()
+		{
+			return PACKET_ID;
+		}
+
+		@Override
+		public S2CPayload fromByteBuf(FriendlyByteBuf buffer)
+		{
+			return new S2CPayload(buffer);
 		}
 	}
 }

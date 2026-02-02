@@ -30,39 +30,44 @@ import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-import com.sakuraryoko.corelib.api.network.IClientPacketListener;
-import com.sakuraryoko.corelib.api.network.IServerPacketListener;
+import com.sakuraryoko.corelib.api.network.INetworkServiceHandler;
+import com.sakuraryoko.corelib.api.network.listener.IClientPacketListener;
+import com.sakuraryoko.corelib.api.network.listener.IServerPacketListener;
+import com.sakuraryoko.corelib.api.network.packet.INetworkPacket;
+import com.sakuraryoko.corelib.api.network.payload.NetworkSide;
+import com.sakuraryoko.corelib.api.network.payload.NetworkSidedPayload;
 import com.sakuraryoko.corelib.impl.network.NetworkServiceManager;
+import com.sakuraryoko.corelib.impl.network.PacketListenerManager;
+import com.sakuraryoko.corelib.impl.network.PayloadManager;
 
 public class CoreServiceHandler
+		implements INetworkServiceHandler<ServerboundCustomPayloadPacket, ClientboundCustomPayloadPacket, CoreServicePacket>
 {
 	private static final CoreServiceHandler INSTANCE = new CoreServiceHandler();
 	public static CoreServiceHandler getInstance() { return INSTANCE; }
 
-	private final Server serverHandler;
-	private final Client clientHandler;
+	private final Server<ServerboundCustomPayloadPacket, ClientboundCustomPayloadPacket, CoreServicePacket> serverHandler;
+	private final Client<ServerboundCustomPayloadPacket, ClientboundCustomPayloadPacket, CoreServicePacket> clientHandler;
 
 	private CoreServiceHandler()
 	{
-		this.serverHandler = new Server();
-		this.clientHandler = new Client();
+		this.serverHandler = new Server<>();
+		this.clientHandler = new Client<>();
 	}
 
-	public ResourceLocation getPacketId()
-	{
-		return CoreServicePacket.PACKET_ID;
-	}
-
-	public Server getServerHandler()
+	@Override
+	public Server<ServerboundCustomPayloadPacket, ClientboundCustomPayloadPacket, CoreServicePacket> getServerHandler()
 	{
 		return this.serverHandler;
 	}
 
-	public Client getClientHandler()
+	@Override
+	public Client<ServerboundCustomPayloadPacket, ClientboundCustomPayloadPacket, CoreServicePacket> getClientHandler()
 	{
 		return this.clientHandler;
 	}
 
+	@Override
 	public CoreServicePacket createHelloPacket()
 	{
 		String name = "test";
@@ -73,7 +78,53 @@ public class CoreServiceHandler
 		return new CoreServicePacket(name, address, port, uuid);
 	}
 
-	public static class Server implements IServerPacketListener
+	@Override
+	public void onRegisterPayloads()
+	{
+		PayloadManager.getInstance().registerPayload(new NetworkSidedPayload<>(NetworkSide.C2S, new CoreServicePacket.Payload(this.createHelloPacket())));
+		PayloadManager.getInstance().registerPayload(new NetworkSidedPayload<>(NetworkSide.S2C, new CoreServicePacket.Payload(this.createHelloPacket())));
+	}
+
+	@Override
+	public void registerPacketListeners()
+	{
+		PacketListenerManager.getInstance().registerC2SPacketListener(this.getServerHandler());
+		PacketListenerManager.getInstance().registerS2CPacketListener(this.getClientHandler());
+	}
+
+	@Override
+	public void unregisterPacketListeners()
+	{
+		PacketListenerManager.getInstance().unregisterC2SPacketListener(this.getServerHandler());
+		PacketListenerManager.getInstance().unregisterS2CPacketListener(this.getClientHandler());
+	}
+
+	@Override
+	public void sendAsC2SPayload(CoreServicePacket packet, Connection connection)
+	{
+		this.getClientHandler().sendAsPayload(packet, connection);
+	}
+
+	@Override
+	public void sendAsS2CPayload(CoreServicePacket packet, Connection connection)
+	{
+		this.getServerHandler().sendAsPayload(packet, connection);
+	}
+
+	@Override
+	public void onReceiveC2SPacket(CoreServicePacket packet, ServerPlayer player)
+	{
+		NetworkServiceManager.LOGGER.warn("[CoreServiceHandler] Received c2s packet from '{}': {}", player.getName().getString(), packet.toString());
+	}
+
+	@Override
+	public void onReceiveS2CPacket(CoreServicePacket packet)
+	{
+		NetworkServiceManager.LOGGER.warn("[CoreServiceHandler] Received s2c packet {}", packet.toString());
+	}
+
+	public static class Server<C, S, PACKET extends INetworkPacket<C, S>>
+			implements IServerPacketListener<C, S, PACKET>
 	{
 		@Override
 		public ResourceLocation getPacketId()
@@ -81,31 +132,38 @@ public class CoreServiceHandler
 			return CoreServicePacket.PACKET_ID;
 		}
 
-		public void sendAsPayload(CoreServicePacket packet, ServerPlayer player)
+		public void sendAsPayload(PACKET packet, ServerPlayer player)
 		{
-			this.sendPacket(new ClientboundCustomPayloadPacket(new CoreServicePacket.Payload(packet)), player);
+			this.sendPacket(packet.asClientBound(), player);
 		}
 
-		public void sendAsPayload(CoreServicePacket packet, Connection connection)
+		public void sendAsPayload(PACKET packet, Connection connection)
 		{
-			connection.send(new ClientboundCustomPayloadPacket(new CoreServicePacket.Payload(packet)));
+			connection.send(packet.asClientBound());
 		}
 
 		@Override
-		public <T extends PacketListener> void receivePacket(Packet<T> packet, ServerPlayer player)
+		public <T extends PacketListener> boolean receivePacket(Packet<T> packet, ServerPlayer player)
 		{
 			if (packet instanceof ServerboundCustomPayloadPacket)
 			{
-				CoreServicePacket.Payload payload = (CoreServicePacket.Payload) ((ServerboundCustomPayloadPacket) packet).payload();
-				CoreServicePacket result = payload.data();
+				CoreServicePacket result = new CoreServicePacket();
+				result = result.fromC2SPacket((ServerboundCustomPayloadPacket) packet);
 
-				// Receive
-				NetworkServiceManager.LOGGER.warn("[CoreServiceHandler] Received c2s packet from '{}': {}", player.getName().getString(), result.toString());
+				if (result != null)
+				{
+					// Receive
+					CoreServiceHandler.getInstance().onReceiveC2SPacket(result, player);
+					return true;
+				}
 			}
+
+			return false;
 		}
 	}
 
-	public static class Client implements IClientPacketListener
+	public static class Client<C, S, PACKET extends INetworkPacket<C, S>>
+			implements IClientPacketListener<C, S, PACKET>
 	{
 		@Override
 		public ResourceLocation getPacketId()
@@ -113,27 +171,33 @@ public class CoreServiceHandler
 			return CoreServicePacket.PACKET_ID;
 		}
 
-		public void sendAsPayload(CoreServicePacket packet)
+		public void sendAsPayload(PACKET packet)
 		{
-			this.sendPacket(new ServerboundCustomPayloadPacket(new CoreServicePacket.Payload(packet)));
+			this.sendPacket(packet.asServerBound());
 		}
 
-		public void sendAsPayload(CoreServicePacket packet, Connection connection)
+		public void sendAsPayload(PACKET packet, Connection connection)
 		{
-			connection.send(new ServerboundCustomPayloadPacket(new CoreServicePacket.Payload(packet)));
+			connection.send(packet.asServerBound());
 		}
 
 		@Override
-		public <T extends PacketListener> void receivePacket(Packet<T> packet)
+		public <T extends PacketListener> boolean receivePacket(Packet<T> packet)
 		{
 			if (packet instanceof ClientboundCustomPayloadPacket)
 			{
-				CoreServicePacket.Payload payload = (CoreServicePacket.Payload) ((ClientboundCustomPayloadPacket) packet).payload();
-				CoreServicePacket result = payload.data();
+				CoreServicePacket result = new CoreServicePacket();
+				result = result.fromS2CPacket((ClientboundCustomPayloadPacket) packet);
 
-				// Receive
-				NetworkServiceManager.LOGGER.warn("[CoreServiceHandler] Received s2c packet {}", result.toString());
+				if (result != null)
+				{
+					// Receive
+					CoreServiceHandler.getInstance().onReceiveS2CPacket(result);
+					return true;
+				}
 			}
+
+			return false;
 		}
 	}
 }

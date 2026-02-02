@@ -25,18 +25,27 @@ import org.jspecify.annotations.NonNull;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
+import com.sakuraryoko.corelib.api.network.packet.INetworkPacket;
+import com.sakuraryoko.corelib.api.network.payload.INetworkPayload;
 import com.sakuraryoko.corelib.impl.Reference;
 
-public class CoreServicePacket
+public class CoreServicePacket implements INetworkPacket<ServerboundCustomPayloadPacket, ClientboundCustomPayloadPacket>
 {
 	public static final ResourceLocation PACKET_ID = new ResourceLocation(Reference.MOD_ID, "network_service");
-	private final String serviceName;
-	private final String serviceAddress;
-	private final int servicePort;
-	private final UUID serviceUUID;
+	private String serviceName;
+	private String serviceAddress;
+	private int servicePort;
+	private UUID serviceUUID;
+
+	public CoreServicePacket()
+	{
+		this("", "", -1, UUID.randomUUID());
+	}
 
 	public CoreServicePacket(String name, String address, int port, UUID uuid)
 	{
@@ -44,6 +53,16 @@ public class CoreServicePacket
 		this.serviceAddress = address;
 		this.servicePort = port;
 		this.serviceUUID = uuid;
+	}
+
+	private CoreServicePacket(FriendlyByteBuf buf)
+	{
+		this.fromByteBuf(buf);
+	}
+
+	public boolean isEmpty()
+	{
+		return this.getServiceName().isEmpty() || this.getServiceAddress().isEmpty();
 	}
 
 	public String getServiceName()
@@ -66,6 +85,26 @@ public class CoreServicePacket
 		return this.serviceUUID;
 	}
 
+	private void setServiceName(String serviceName)
+	{
+		this.serviceName = serviceName;
+	}
+
+	private void setServiceAddress(String serviceAddress)
+	{
+		this.serviceAddress = serviceAddress;
+	}
+
+	private void setServicePort(int servicePort)
+	{
+		this.servicePort = servicePort;
+	}
+
+	private void setServiceUUID(UUID serviceUUID)
+	{
+		this.serviceUUID = serviceUUID;
+	}
+
 	@Override
 	public String toString()
 	{
@@ -80,6 +119,7 @@ public class CoreServicePacket
 				+ "]";
 	}
 
+	@Override
 	public void toByteBuf(FriendlyByteBuf packet)
 	{
 		packet.writeUtf(this.serviceName);
@@ -88,24 +128,76 @@ public class CoreServicePacket
 		packet.writeUUID(this.serviceUUID);
 	}
 
-	public static CoreServicePacket fromByteBuf(FriendlyByteBuf packet)
+	@Override
+	public ServerboundCustomPayloadPacket toC2SPacket()
 	{
-		String name = packet.readUtf();
-		String address = packet.readUtf();
-		int port = packet.readInt();
-		UUID uuid = packet.readUUID();
-
-		return new CoreServicePacket(name, address, port, uuid);
+		return new ServerboundCustomPayloadPacket(new Payload(this));
 	}
 
-	public record Payload(CoreServicePacket data) implements CustomPacketPayload
+	@Override
+	public ClientboundCustomPayloadPacket toS2CPacket()
+	{
+		return new ClientboundCustomPayloadPacket(new Payload(this));
+	}
+
+	@Override
+	public ServerboundCustomPayloadPacket asServerBound()
+	{
+		return this.toC2SPacket();
+	}
+
+	@Override
+	public ClientboundCustomPayloadPacket asClientBound()
+	{
+		return this.toS2CPacket();
+	}
+
+	@Override
+	public void fromByteBuf(FriendlyByteBuf packet)
+	{
+		this.setServiceName(packet.readUtf());
+		this.setServiceAddress(packet.readUtf());
+		this.setServicePort(packet.readInt());
+		this.setServiceUUID(packet.readUUID());
+	}
+
+	@Override
+	public CoreServicePacket fromC2SPacket(ServerboundCustomPayloadPacket packet)
+	{
+		if (packet.payload() instanceof Payload)
+		{
+			return ((Payload) packet.payload()).data();
+		}
+
+		return null;
+	}
+
+	@Override
+	public CoreServicePacket fromS2CPacket(ClientboundCustomPayloadPacket packet)
+	{
+		if (packet.payload() instanceof Payload)
+		{
+			return ((Payload) packet.payload()).data();
+		}
+
+		return null;
+	}
+
+	private static CoreServicePacket createFromByteBuf(FriendlyByteBuf buf)
+	{
+		return new CoreServicePacket(buf);
+	}
+
+	public record Payload(CoreServicePacket data)
+			implements CustomPacketPayload, INetworkPayload<FriendlyByteBuf, Payload>
 	{
 		public static final Type<Payload> ID = new Type<>(PACKET_ID);
 		public static final StreamCodec<FriendlyByteBuf, Payload> CODEC = CustomPacketPayload.codec(Payload::write, Payload::new);
+		public static final TypeAndCodec<FriendlyByteBuf, Payload> TYPE_AND_CODEC = new TypeAndCodec<>(ID, CODEC);
 
 		public Payload(FriendlyByteBuf input)
 		{
-			this(CoreServicePacket.fromByteBuf(input));
+			this(CoreServicePacket.createFromByteBuf(input));
 		}
 
 		public void write(@NonNull FriendlyByteBuf buffer)
@@ -117,6 +209,18 @@ public class CoreServicePacket
 		public @NonNull Type<Payload> type()
 		{
 			return ID;
+		}
+
+		@Override
+		public ResourceLocation getPacketId()
+		{
+			return ID.id();
+		}
+
+		@Override
+		public TypeAndCodec<FriendlyByteBuf, Payload> getTypeAndCodec()
+		{
+			return TYPE_AND_CODEC;
 		}
 	}
 }

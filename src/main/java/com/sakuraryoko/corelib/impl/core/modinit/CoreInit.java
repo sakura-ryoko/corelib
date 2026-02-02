@@ -30,6 +30,7 @@ import com.sakuraryoko.corelib.impl.Reference;
 import com.sakuraryoko.corelib.impl.config.ConfigManager;
 import com.sakuraryoko.corelib.impl.core.config.CoreConfigHandler;
 import com.sakuraryoko.corelib.impl.events.tick.TickManager;
+import com.sakuraryoko.corelib.impl.network.announcer.CoreServiceHandler;
 import com.sakuraryoko.corelib.impl.network.thread.CoreNetworkThreadHandler;
 import com.sakuraryoko.corelib.impl.text.BuiltinTextHandler;
 
@@ -82,6 +83,9 @@ public class CoreInit implements IModInitDispatcher
             ConfigManager.getInstance().registerConfigDispatcher(CoreConfigHandler.getInstance());
             TickManager.getInstance().registerTickHandler(CoreNetworkThreadHandler.getInstance());
             CoreNetworkThreadHandler.getInstance().start();
+
+            CoreServiceHandler.getInstance().onRegisterPayloads();
+            CoreServiceHandler.getInstance().registerPacketListeners();
         }
 
         this.INIT = true;

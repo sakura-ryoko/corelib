@@ -134,7 +134,7 @@ public abstract class MixinPlayerList
     {
         if (Reference.EXPERIMENTAL)
         {
-            CoreServiceHandler.getInstance().getServerHandler().sendAsPayload(CoreServiceHandler.getInstance().createHelloPacket(), connection);
+            CoreServiceHandler.getInstance().sendAsS2CPayload(CoreServiceHandler.getInstance().createHelloPacket(), connection);
         }
     }
 
