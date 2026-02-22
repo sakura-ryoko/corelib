@@ -4,3 +4,5 @@
 [![workflow](https://github.com/sakura-ryoko/corelib/actions/workflows/gradle.yml/badge.svg)](https://github.com/sakura-ryoko/corelib/actions/workflows/gradle.yml)
 
 sakura's fabric core library mod
+
+[![Join Sakura's RyokoCraft Discord](https://sakuraryoko.com/files/1398873/discord-300px.png)](https://discord.gg/CUPAjkXw)
