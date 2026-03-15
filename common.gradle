@@ -272,7 +272,7 @@ publishing {
 	repositories {
 		// mavenLocal()
 		maven {
-			url = "$projectDir/../../CommonMaven"
+			url = "$projectDir/../../../../CommonMaven"
 		}
 
 //		// [FEATURE] FALLENS_MAVEN
