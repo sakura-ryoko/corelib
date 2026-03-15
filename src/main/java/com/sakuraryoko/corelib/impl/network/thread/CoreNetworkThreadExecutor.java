@@ -23,12 +23,27 @@ package com.sakuraryoko.corelib.impl.network.thread;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.sakuraryoko.corelib.api.thread.IThreadDaemonExecutor;
+import com.sakuraryoko.corelib.api.util.MathUtils;
 import com.sakuraryoko.corelib.impl.network.NetworkServiceManager;
 
 public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetworkThreadTask>
 {
 	private final AtomicBoolean running = new AtomicBoolean(true);
-	private long lastTick = System.currentTimeMillis();
+	private final AtomicBoolean paused = new AtomicBoolean(false);
+	private final long sleepTime;
+	private final float sleepDelay;
+	private long lastTaskTime;
+
+	public CoreNetworkThreadExecutor()
+	{
+		this(600000L);  // 10 min
+	}
+
+	public CoreNetworkThreadExecutor(long sleepTime)
+	{
+		this.sleepTime = MathUtils.clamp(sleepTime, 60000L, Long.MAX_VALUE); // 1 min
+		this.sleepDelay = 0.75F;     // <1-second sleep delay (Must be 1/2 tick rate)
+	}
 
 	@Override
 	public boolean isRunning()
@@ -37,15 +52,89 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	}
 
 	@Override
+	public boolean isPaused()
+	{
+		return this.paused.get();
+	}
+
+	@Override
 	public void start()
 	{
-		this.running.set(true);
+		if (!this.isRunning())
+		{
+			NetworkServiceManager.LOGGER.info("Executor: Starting");
+			if (this.isPaused())
+			{
+				this.paused.set(false);
+			}
+
+			this.running.set(true);
+		}
+
+		this.run();
+	}
+
+	@Override
+	public void interrupt(InterruptedException interrupt)
+	{
+		NetworkServiceManager.LOGGER.info("Executor: Interrupt Signal: {}", interrupt.getLocalizedMessage() != null
+		                                                   ? interrupt.getLocalizedMessage()  // This is null sometimes?
+		                                                   : "received interrupt signal");
+		if (this.isPaused() || !this.isRunning())
+		{
+			this.resume();
+		}
+	}
+
+	@Override
+	public void pause()
+	{
+		NetworkServiceManager.LOGGER.info("Executor: Pausing");
+		this.paused.set(true);
+	}
+
+	@Override
+	public void resume()
+	{
+		if (this.isPaused())
+		{
+			NetworkServiceManager.LOGGER.info("Executor: Resuming");
+			this.paused.set(false);
+		}
+
+		this.start();
 	}
 
 	@Override
 	public void stop()
 	{
-		this.running.set(false);
+		NetworkServiceManager.LOGGER.info("Executor: Stopping");
+		if (!this.isPaused())
+		{
+			this.paused.set(true);
+		}
+		if (this.isRunning())
+		{
+			this.running.set(false);
+		}
+	}
+
+	@Override
+	public long sleepTime()
+	{
+		return this.sleepTime;
+	}
+
+	@Override
+	public String getName()
+	{
+		return CoreNetworkThreadHandler.getInstance().getName();
+	}
+
+	@Override
+	public boolean hasTasks()
+	{
+		return CoreNetworkThreadHandler.getInstance().hasTasks();
 	}
 
 	@Override
@@ -53,32 +142,61 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	{
 		NetworkServiceManager.LOGGER.info("CoreNetworkThreadExecutor: begin");
 
+		if (!this.isCorrectThread()) { return; }
+		this.lastTaskTime = System.currentTimeMillis();
+		NetworkServiceManager.LOGGER.info("Executor: Running: [{}/{}]", this.isRunning(), this.isPaused());
+
 		while (this.isRunning())
 		{
-			final long now = System.currentTimeMillis();
-
-			if ((now - this.lastTick) > 15000L)
+			if (this.isPaused() && this.hasTasks())
 			{
-				NetworkServiceManager.LOGGER.error("CoreNetworkThreadExecutor: tick()");
-				this.lastTick = now;
+				this.resume();
 			}
-
-			try
+			else if (!this.isPaused() && this.loopSafe())
 			{
-				CoreNetworkThreadTask task = CoreNetworkThreadHandler.getInstance().getNextTask();
-
-				if (task != null)
-				{
-					this.processTask(task);
-				}
-			}
-			catch (Exception e)
-			{
-				NetworkServiceManager.LOGGER.error("CoreNetworkThreadExecutor: Exception running task; {}", e.getLocalizedMessage());
+				this.paused.set(true);
+				this.sleep();
+				return;
 			}
 		}
+	}
 
-		NetworkServiceManager.LOGGER.info("CoreNetworkThreadExecutor: exit");
+	@Override
+	public boolean loopSafe()
+	{
+		try
+		{
+			CoreNetworkThreadTask task = this.takeNextTask();
+
+			if (task != null)
+			{
+				this.processTask(task);
+				this.lastTaskTime = System.currentTimeMillis();
+				return false;
+			}
+		}
+		catch (InterruptedException e)
+		{
+			this.interrupt(e);
+		}
+		catch (Exception err)
+		{
+			NetworkServiceManager.LOGGER.error("loopSafe: Exception: {}", err.getLocalizedMessage());
+		}
+
+		return this.shouldPause();
+	}
+
+	@Override
+	public boolean shouldPause()
+	{
+		if (this.hasTasks()) { return false; }
+		return (System.currentTimeMillis() - this.lastTaskTime) > (this.sleepDelay * 1000L);
+	}
+
+	private CoreNetworkThreadTask takeNextTask() throws InterruptedException
+	{
+		return CoreNetworkThreadHandler.getInstance().getNextTask();
 	}
 
 	@Override

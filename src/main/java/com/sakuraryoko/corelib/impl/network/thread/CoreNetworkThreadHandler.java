@@ -20,38 +20,67 @@
 
 package com.sakuraryoko.corelib.impl.network.thread;
 
+import java.util.ConcurrentModificationException;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 
 import com.sakuraryoko.corelib.api.thread.IThreadDaemonHandler;
 import com.sakuraryoko.corelib.api.time.ITickHandler;
+import com.sakuraryoko.corelib.api.util.MathUtils;
 import com.sakuraryoko.corelib.impl.Reference;
+import com.sakuraryoko.corelib.impl.network.NetworkServiceManager;
 
 public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetworkThreadTask>, ITickHandler
 {
-	private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("CoreNetworkThreadHandler-%d").build();
 	private static final CoreNetworkThreadHandler INSTANCE = new CoreNetworkThreadHandler();
 	public static CoreNetworkThreadHandler getInstance() { return INSTANCE; }
 
-	private final Thread thread;
-	private final CoreNetworkThreadExecutor executor;
+	private static final int MAX_PLATFORM_THREADS = 1;
+	private boolean useVirtual = false;
+	private final String namePrefix = "CoreNetworkThreadHandler Worker Thread";
+	private static final float TASK_INTERVAL = 15.0F;
+	private final int threadCount = this.calculateMaxThreads();
+	private final ConcurrentHashMap<String, Thread> threadMap = this.builder();
 	private final LinkedBlockingQueue<CoreNetworkThreadTask> queue;
-	private final int taskInterval;
 	private long lastClientTick;
 	private long lastServerTick;
 
-	public CoreNetworkThreadHandler()
+	private int calculateMaxThreads()
 	{
-		this.executor = new CoreNetworkThreadExecutor();
-		this.thread = THREAD_FACTORY.newThread(this.executor);
+		final int result = this.getThreadCountSafe();
+		if (result < 1) { this.useVirtual = true; }
+
+		return MathUtils.clamp(result, 1, MAX_PLATFORM_THREADS);
+	}
+
+	private ConcurrentHashMap<String, Thread> builder()
+	{
+		ConcurrentHashMap<String, Thread> threads = new ConcurrentHashMap<>(this.threadCount, 0.9f, 1);
+
+		for (int i = 0; i < this.threadCount; i++)
+		{
+			final String name = this.threadCount > 1 ? this.namePrefix+" "+ (i+1) : this.namePrefix;
+			threads.put(name, this.threadFactory(name, this.useVirtual, new CoreNetworkThreadExecutor()));
+		}
+
+		return threads;
+	}
+
+	private CoreNetworkThreadHandler()
+	{
 		this.queue = new LinkedBlockingQueue<>();
-		this.taskInterval = 15;
 		this.lastClientTick = System.currentTimeMillis();
 		this.lastServerTick = System.currentTimeMillis();
+	}
+
+	@Override
+	public String getName()
+	{
+		return this.namePrefix;
 	}
 
 	@Override
@@ -59,15 +88,69 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 	{
 		if (Reference.EXPERIMENTAL)
 		{
-			this.executor.start();
-			this.thread.start();
+			NetworkServiceManager.LOGGER.info("Starting [{}] Worker Daemon threads", this.threadMap.size());
+			Set<String> keys = this.threadMap.keySet();
+
+			for (String key : keys)
+			{
+				try
+				{
+					this.safeStart(this.threadMap.get(key));
+				}
+				catch (ConcurrentModificationException cme)
+				{
+					// Busy
+				}
+				catch (IllegalStateException is)
+				{
+					// Terminated
+					Thread entry = this.threadFactory(key, this.useVirtual, new CoreNetworkThreadExecutor());
+					entry.start();
+
+					synchronized (this.threadMap)
+					{
+						this.threadMap.replace(key, entry);
+					}
+				}
+				catch (RuntimeException re)
+				{
+					// Already Running
+				}
+				catch (Exception ignored) {}
+			}
 		}
 	}
 
 	@Override
 	public void stop()
 	{
-		this.thread.interrupt();
+		if (Reference.EXPERIMENTAL)
+		{
+			NetworkServiceManager.LOGGER.info("Stopping [{}] Worker Daemon threads", this.threadMap.size());
+			Set<String> keys = this.threadMap.keySet();
+
+			for (String key : keys)
+			{
+				try
+				{
+					this.safeStop(this.threadMap.get(key));
+				}
+				catch (ConcurrentModificationException cme)
+				{
+					// Busy
+					NetworkServiceManager.LOGGER.warn("Thread [{}] is currently busy, and shouldn't be stopped", key);
+				}
+				catch (IllegalStateException is)
+				{
+					// Terminated already
+				}
+				catch (IllegalThreadStateException is)
+				{
+					// Never started
+				}
+				catch (Exception ignored) {}
+			}
+		}
 	}
 
 	@Override
@@ -77,11 +160,17 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 	}
 
 	@Override
-	public void addTask(CoreNetworkThreadTask newTask)
+	public void addTask(CoreNetworkThreadTask task)
 	{
 		if (Reference.EXPERIMENTAL)
 		{
-			this.queue.add(newTask);
+			final boolean wasEmpty = this.queue.isEmpty();
+			this.queue.offer(task);
+
+			if (wasEmpty)
+			{
+				this.ensureThreadsAreAlive();
+			}
 		}
 	}
 
@@ -96,10 +185,21 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 		return null;
 	}
 
+	protected int getTaskCount()
+	{
+		return this.queue.size();
+	}
+
+	@Override
+	public boolean hasTasks()
+	{
+		return !this.queue.isEmpty();
+	}
+
 	@Override
 	public long getTaskInterval()
 	{
-		return this.taskInterval * 1000L;
+		return MathUtils.floor(TASK_INTERVAL * 1000L);
 	}
 
 	@Override
@@ -115,6 +215,11 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 
 		if ((now - this.lastClientTick) > this.getTaskInterval())
 		{
+			if (mc.level != null)
+			{
+				this.ensureThreadsAreAlive();
+			}
+
 			this.lastClientTick = now;
 		}
 	}
@@ -126,15 +231,42 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 
 		if ((now - this.lastServerTick) > this.getTaskInterval())
 		{
+			this.ensureThreadsAreAlive();
 			this.lastServerTick = now;
+		}
+	}
+
+	private void ensureThreadsAreAlive()
+	{
+		if (this.hasTasks())
+		{
+			Set<String> keySet = this.threadMap.keySet();
+
+			for (String key : keySet)
+			{
+				try
+				{
+					this.safeStart(this.threadMap.get(key));
+				}
+				catch (IllegalStateException is)
+				{
+					// Terminated (Replace)
+					Thread entry = this.threadFactory(key, this.useVirtual, new CoreNetworkThreadExecutor());
+					entry.start();
+
+					synchronized (this.threadMap)
+					{
+						this.threadMap.replace(key, entry);
+					}
+				}
+				catch (RuntimeException ignored) {}
+			}
 		}
 	}
 
 	@Override
 	public void close() throws Exception
 	{
-		this.reset();
-		this.executor.stop();
-		this.thread.join();
+		this.endAll();
 	}
 }
