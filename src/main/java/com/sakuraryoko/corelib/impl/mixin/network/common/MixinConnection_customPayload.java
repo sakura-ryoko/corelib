@@ -21,6 +21,8 @@
 package com.sakuraryoko.corelib.impl.mixin.network.common;
 
 import java.util.Set;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 
@@ -34,7 +36,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 import com.sakuraryoko.corelib.impl.Reference;
 import com.sakuraryoko.corelib.impl.mixin.network.c2s.IMixinServerboundCustomPayloadPacket_customPayload;
@@ -46,39 +47,42 @@ public class MixinConnection_customPayload
 	@Shadow private Channel channel;
 	@Shadow @Final public static AttributeKey<ConnectionProtocol> ATTRIBUTE_PROTOCOL;
 
-	@Redirect(method = "sendPacket",
-	          at = @At(value = "INVOKE",
+	@WrapOperation(method = "sendPacket",
+	               at = @At(value = "INVOKE",
 	                 target = "Lnet/minecraft/network/ConnectionProtocol;getProtocolForPacket(Lnet/minecraft/network/protocol/Packet;)Lnet/minecraft/network/ConnectionProtocol;"))
-	private ConnectionProtocol corelib$onSendPacketFix(Packet<?> packet)
+	private ConnectionProtocol corelib$onSendPacketFix(Packet<?> packet, Operation<ConnectionProtocol> original)
 	{
-		ConnectionProtocol protocol = ConnectionProtocol.getProtocolForPacket(packet);
-
-		if (Reference.EXPERIMENTAL && protocol == null)
+		if (Reference.EXPERIMENTAL)
 		{
-			ConnectionProtocol fixedProtocol = this.channel.attr(ATTRIBUTE_PROTOCOL).get();
+			ConnectionProtocol protocol = ConnectionProtocol.getProtocolForPacket(packet);
 
-			if (packet instanceof ClientboundCustomPayloadPacket)
+			if (protocol == null)
 			{
-				ResourceLocation id = ((ClientboundCustomPayloadPacket) packet).getIdentifier();
-				Set<ResourceLocation> ids = PacketListenerManager.getInstance().getS2CKeySet();
+				ConnectionProtocol fixedProtocol = this.channel.attr(ATTRIBUTE_PROTOCOL).get();
 
-				if (ids.contains(id))
+				if (packet instanceof ClientboundCustomPayloadPacket)
 				{
-					return fixedProtocol;
+					ResourceLocation id = ((ClientboundCustomPayloadPacket) packet).getIdentifier();
+					Set<ResourceLocation> ids = PacketListenerManager.getInstance().getS2CKeySet();
+
+					if (ids.contains(id))
+					{
+						return fixedProtocol;
+					}
 				}
-			}
-			else if (packet instanceof ServerboundCustomPayloadPacket)
-			{
-				ResourceLocation id = ((IMixinServerboundCustomPayloadPacket_customPayload) packet).corelib$getIdentifier();
-				Set<ResourceLocation> ids = PacketListenerManager.getInstance().getC2SKeySet();
-
-				if (ids.contains(id))
+				else if (packet instanceof ServerboundCustomPayloadPacket)
 				{
-					return fixedProtocol;
+					ResourceLocation id = ((IMixinServerboundCustomPayloadPacket_customPayload) packet).corelib$getIdentifier();
+					Set<ResourceLocation> ids = PacketListenerManager.getInstance().getC2SKeySet();
+
+					if (ids.contains(id))
+					{
+						return fixedProtocol;
+					}
 				}
 			}
 		}
 
-		return protocol;
+		return original.call(packet);
 	}
 }
