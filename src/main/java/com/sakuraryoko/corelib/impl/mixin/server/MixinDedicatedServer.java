@@ -20,8 +20,13 @@
 
 package com.sakuraryoko.corelib.impl.mixin.server;
 
+//#if MC >= 26.1
+//$$ import java.util.Optional;
+//$$ import net.minecraft.world.level.gamerules.GameRules;
+//#else
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
+//#endif
 import com.mojang.datafixers.DataFixer;
 //#if MC >= 11902
 //$$ import net.minecraft.server.Services;
@@ -66,7 +71,11 @@ import com.sakuraryoko.corelib.impl.network.NetworkServiceManager;
 public class MixinDedicatedServer
 {
     @Inject(method = "<init>", at = @At("RETURN"))
-//#if MC >= 12110
+//#if MC >= 26.1
+    //$$ private void corelib$onDedicatedServer(Thread serverThread, LevelStorageSource.LevelStorageAccess levelStorageSource, PackRepository packRepository,
+                                                //$$ WorldStem worldStem, Optional<GameRules> gameRules, DedicatedServerSettings settings, DataFixer fixerUpper,
+                                                //$$ Services services, CallbackInfo ci)
+//#elseif MC >= 12110
     //$$ private void corelib$onDedicatedServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository,
 												//$$ WorldStem worldStem, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
 											    //$$ Services services, CallbackInfo ci)
