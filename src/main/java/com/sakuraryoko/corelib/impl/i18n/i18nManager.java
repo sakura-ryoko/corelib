@@ -24,6 +24,8 @@ import com.sakuraryoko.corelib.api.i18n.i18nConfig;
 import com.sakuraryoko.corelib.api.i18n.i18nOption;
 import com.sakuraryoko.corelib.impl.CoreLib;
 import com.sakuraryoko.corelib.impl.Reference;
+import com.sakuraryoko.corelib.impl.text.BuiltinTextHandler;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
@@ -271,12 +273,11 @@ public class i18nManager
 		}
 	}
 
-	// TODO
-//	public Component translateAsText(String key, Object... args)
-//	{
-//		this.ensureLang();
-//		return this.lang.translate(key, args);
-//	}
+	public Component translateAsText(String key, Object... args)
+	{
+		this.ensureLang();
+		return BuiltinTextHandler.getInstance().of(this.translate(key, args));
+	}
 
 	// matches 'en_us.json'; for example.
 	@ApiStatus.Internal

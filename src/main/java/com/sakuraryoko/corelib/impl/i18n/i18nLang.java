@@ -26,11 +26,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sakuraryoko.corelib.api.i18n.i18nOption;
 import com.sakuraryoko.corelib.impl.CoreLib;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nullable;
@@ -127,33 +122,4 @@ public class i18nLang
 	{
 		return this.map.getOrDefault(key, defaultString);
 	}
-
-	//#if MC >= 1.21.0
-	//$$ public MutableComponent translate(final String key, Object... args)
-	//$$ {
-		//$$ if (this.hasTranslation(key))
-		//$$ {
-			//$$ return Component.translatableWithFallback(key, this.get(key), args);
-		//$$ }
-		//$$ else
-		//$$ {
-			//$$ return Component.literal(key)
-				//$$ .withStyle((style) ->
-					//$$ style.withColor(ChatFormatting.RED)
-					//$$ .withHoverEvent(new HoverEvent.ShowText(Component.nullToEmpty("Missing translation: " + key))));
-		//$$ }
-	//$$ }
-	//#else
-//	public Component translate(final String key, Object... args)
-//	{
-//		if (this.hasTranslation(key))
-//		{
-//			return new TextComponent()
-//		}
-//		else
-//		{
-//			return new TextComponent(key);
-//		}
-//	}
-	//#endif
 }
