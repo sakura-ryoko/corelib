@@ -32,17 +32,21 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	private final AtomicBoolean paused = new AtomicBoolean(false);
 	private final long sleepTime;
 	private final float sleepDelay;
+	private long maxTicks;
 	private long lastTaskTime;
+	private long ticks;
 
 	public CoreNetworkThreadExecutor()
 	{
-		this(600000L);  // 10 min
+		this(1800000L);  // 30 min
 	}
 
 	public CoreNetworkThreadExecutor(long sleepTime)
 	{
 		this.sleepTime = MathUtils.clamp(sleepTime, 60000L, Long.MAX_VALUE); // 1 min
 		this.sleepDelay = 0.75F;     // <1-second sleep delay (Must be 1/2 tick rate)
+		this.maxTicks = 8L;          // Cap how many ticks per an interrupt cycle without tasks to do
+		this.ticks = 0L;
 	}
 
 	@Override
@@ -68,10 +72,8 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 				this.paused.set(false);
 			}
 
-			this.running.set(true);
+			this.run();
 		}
-
-		this.run();
 	}
 
 	@Override
@@ -102,7 +104,7 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 			this.paused.set(false);
 		}
 
-		this.start();
+//		this.start();
 	}
 
 	@Override
@@ -143,7 +145,11 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 		NetworkServiceManager.LOGGER.info("CoreNetworkThreadExecutor: begin");
 
 		if (!this.isCorrectThread()) { return; }
+
+		this.running.set(true);
+		this.maxTicks = CoreNetworkThreadHandler.getInstance().getProfile().maxTicks();
 		this.lastTaskTime = System.currentTimeMillis();
+		this.ticks = 0L;
 		NetworkServiceManager.LOGGER.info("Executor: Running: [{}/{}]", this.isRunning(), this.isPaused());
 
 		while (this.isRunning())
@@ -155,8 +161,16 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 			else if (!this.isPaused() && this.loopSafe())
 			{
 				this.paused.set(true);
-				this.sleep();
-				return;
+				this.ticks = 0L;
+
+				if (this.hasTasks())
+				{
+					this.sleep(CoreNetworkThreadHandler.getInstance().getProfile().yieldTime());
+				}
+				else
+				{
+					this.sleep();
+				}
 			}
 		}
 	}
@@ -164,6 +178,8 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	@Override
 	public boolean loopSafe()
 	{
+		this.ticks++;
+
 		try
 		{
 			CoreNetworkThreadTask task = this.takeNextTask();
@@ -172,7 +188,6 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 			{
 				this.processTask(task);
 				this.lastTaskTime = System.currentTimeMillis();
-				return false;
 			}
 		}
 		catch (InterruptedException e)
@@ -190,6 +205,7 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	@Override
 	public boolean shouldPause()
 	{
+		if (this.ticks > this.maxTicks) { return true; }
 		if (this.hasTasks()) { return false; }
 		return (System.currentTimeMillis() - this.lastTaskTime) > (this.sleepDelay * 1000L);
 	}

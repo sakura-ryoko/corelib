@@ -20,17 +20,36 @@
 
 package com.sakuraryoko.corelib.api.thread;
 
-/**
- * Basic run() task handler structure --
- * This is meant to be extended and managed by {@link IThreadDaemonExecutor}
- * -
- * NOTE: Default tasks are meant to run in a proper sequence; ie; "0, 1, 2, 3, 4"
- */
-public abstract class AbstractThreadTaskDefault extends AbstractThreadTask
+public enum ThreadProfiles
 {
-	/**
-	 * Run the task using {@link Runnable}
-	 */
-	@Override
-	public abstract void run();
+	MAX			(new ThreadProfile("max", 	32, 20L)),
+	DEFAULT		(new ThreadProfile("default", 16, 50L)),
+	MIN			(new ThreadProfile("min", 	8,  100L)),
+	POTATO		(new ThreadProfile("potato", 	4,  150L)),
+	;
+
+	private final ThreadProfile profile;
+
+	ThreadProfiles(ThreadProfile profile)
+	{
+		this.profile = profile;
+	}
+
+	public ThreadProfile profile()
+	{
+		return this.profile;
+	}
+
+	public static ThreadProfiles fromString(String string)
+	{
+		for (ThreadProfiles entry : values())
+		{
+			if (entry.profile().name().equalsIgnoreCase(string))
+			{
+				return entry;
+			}
+		}
+
+		return ThreadProfiles.DEFAULT;
+	}
 }

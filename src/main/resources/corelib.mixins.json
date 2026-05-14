@@ -4,7 +4,6 @@
     "package": "com.sakuraryoko.corelib.impl.mixin",
     "compatibilityLevel": "{{COMPATIBILITY_LEVEL}}",
     "mixins": [
-        "server.MixinPrepareSpawnTask",
         "network.c2s.IMixinServerboundCustomPayloadPacket_customPayload",
         "network.c2s.MixinServerboundCustomPayloadPacket_customPayload",
         "network.c2s.MixinServerCommonPacketListenerImpl_customPayload",
@@ -17,7 +16,8 @@
         "server.MixinCommands",
         "server.MixinDedicatedServer",
         "server.MixinMinecraftServer",
-        "server.MixinPlayerList"
+        "server.MixinPlayerList",
+        "server.MixinPrepareSpawnTask"
     ],
     "client": [
         "client.MixinMinecraft",
@@ -28,5 +28,8 @@
     "server": [],
     "injectors": {
         "defaultRequire": 1
-  }
+    },
+    "overwrites": {
+        "requireAnnotations": true
+    }
 }

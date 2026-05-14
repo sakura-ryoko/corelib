@@ -149,16 +149,12 @@ public interface IThreadDaemonExecutor<T extends IThreadTaskBase> extends Runnab
 					this.pause();
 				}
 
-				CoreLib.debugLog("IThreadDaemonExecutor#Executor: sleeping: '{}' for [{}]", this.currentThreadName(), this.sleepTime());
+				CoreLib.debugLog("IThreadDaemonExecutor#Executor: sleeping: '{}' for [{}]", this.currentThreadName(), millis);
 				Thread.sleep(millis);
 			}
 			catch (InterruptedException e)
 			{
 				this.interrupt(e);
-			}
-			finally
-			{
-				this.resume();
 			}
 		}
 	}

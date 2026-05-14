@@ -22,7 +22,7 @@ package com.sakuraryoko.corelib.api.thread;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class AbstractThreadTask implements IThreadTaskBase
+public abstract class AbstractThreadTask implements IThreadTaskBase, Runnable
 {
 	private final AtomicBoolean finished = new AtomicBoolean(false);
 
@@ -37,4 +37,10 @@ public abstract class AbstractThreadTask implements IThreadTaskBase
 	{
 		this.finished.set(true);
 	}
+
+	/**
+	 * Run the task using {@link Runnable}
+	 */
+	@Override
+	public abstract void run();
 }

@@ -20,6 +20,7 @@
 
 package com.sakuraryoko.corelib.impl.mixin.client;
 
+import com.sakuraryoko.corelib.impl.network.thread.CoreNetworkThreadHandler;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
@@ -208,5 +209,11 @@ public abstract class MixinMinecraft
     private void corelib$onTick(CallbackInfo ci)
     {
         TickManager.getInstance().onClientTick((Minecraft) (Object) this);
+    }
+
+    @Inject(method = "stop", at = @At("HEAD"))
+    private void corelib$onRunStop(CallbackInfo ci)
+    {
+        CoreNetworkThreadHandler.getInstance().endAll();
     }
 }

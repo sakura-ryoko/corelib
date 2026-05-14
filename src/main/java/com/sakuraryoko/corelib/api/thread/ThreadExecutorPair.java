@@ -20,23 +20,24 @@
 
 package com.sakuraryoko.corelib.api.thread;
 
-public interface IThreadTaskBase
+public class ThreadExecutorPair<T extends IThreadTaskBase>
 {
-	/**
-	 * Check if the task is marked as "finished"
-	 * @return (bool)
-	 */
-	boolean isFinished();
+	private final Thread thread;
+	private final IThreadDaemonExecutor<T> executor;
 
-	/**
-	 * Mark the task as finished.
-	 */
-	void finish();
-
-	/**
-	 * Run the task using {@link Runnable}
-	 */
-	default void run()
+	public ThreadExecutorPair(Thread thread, IThreadDaemonExecutor<T> executor)
 	{
+		this.thread = thread;
+		this.executor = executor;
+	}
+
+	public Thread thread()
+	{
+		return this.thread;
+	}
+
+	public IThreadDaemonExecutor<T> executor()
+	{
+		return this.executor;
 	}
 }

@@ -23,7 +23,9 @@ package com.sakuraryoko.corelib.api.modinit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import com.sakuraryoko.corelib.impl.i18n.i18nManager;
 import net.minecraft.network.chat.Component;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -129,4 +131,9 @@ public interface IModInitDispatcher
     default String getModSources() {return this.getModInit().getModSources();}
 
     default String getModHomepage() {return this.getModInit().getModHomepage();}
+
+    default Optional<i18nManager> getLanguageManager()
+    {
+        return Optional.empty();
+    }
 }

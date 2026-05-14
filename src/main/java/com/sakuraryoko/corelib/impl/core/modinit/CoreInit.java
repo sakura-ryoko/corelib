@@ -20,6 +20,7 @@
 
 package com.sakuraryoko.corelib.impl.core.modinit;
 
+import com.sakuraryoko.corelib.impl.i18n.i18nManager;
 import org.jetbrains.annotations.ApiStatus;
 
 import com.sakuraryoko.corelib.api.log.AnsiLogger;
@@ -34,6 +35,8 @@ import com.sakuraryoko.corelib.impl.network.announcer.CoreServiceHandler;
 import com.sakuraryoko.corelib.impl.network.thread.CoreNetworkThreadHandler;
 import com.sakuraryoko.corelib.impl.text.BuiltinTextHandler;
 
+import java.util.Optional;
+
 @ApiStatus.Internal
 public class CoreInit implements IModInitDispatcher
 {
@@ -42,6 +45,7 @@ public class CoreInit implements IModInitDispatcher
     private static final ModInitData MOD_DATA = new ModInitData(Reference.MOD_ID);
     private final AnsiLogger LOGGER = new AnsiLogger(this.getClass(), this.isDebug());
     private boolean INIT = false;
+    private i18nManager LANG;
 
     @Override
     public ModInitData getModInit()
@@ -88,6 +92,13 @@ public class CoreInit implements IModInitDispatcher
             CoreServiceHandler.getInstance().registerPacketListeners();
         }
 
+        this.LANG = i18nManager.create(this.getModId());
         this.INIT = true;
+    }
+
+    @Override
+    public Optional<i18nManager> getLanguageManager()
+    {
+        return Optional.ofNullable(this.LANG);
     }
 }

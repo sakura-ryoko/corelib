@@ -20,9 +20,9 @@
 
 package com.sakuraryoko.corelib.impl.network.thread;
 
-import com.sakuraryoko.corelib.api.thread.AbstractThreadTaskDefault;
+import com.sakuraryoko.corelib.api.thread.AbstractThreadTask;
 
-public class CoreNetworkThreadTask extends AbstractThreadTaskDefault
+public class CoreNetworkThreadTask extends AbstractThreadTask
 {
 	private final Runnable futureTask;
 

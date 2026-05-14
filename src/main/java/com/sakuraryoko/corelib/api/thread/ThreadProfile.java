@@ -20,20 +20,31 @@
 
 package com.sakuraryoko.corelib.api.thread;
 
-import java.util.concurrent.CompletableFuture;
-
-/**
- * Basic runAsync() task handler structure --
- * This is meant to be extended and managed by {@link IThreadDaemonExecutor}
- * -
- * NOTE: Async tasks can often run "out of sequence", such as "3, 0, 2, 1, 4"
- */
-public abstract class AbstractThreadTaskAsync extends AbstractThreadTask
+public class ThreadProfile
 {
-	/**
-	 * Run the task {@link CompletableFuture}
-	 * @return (null)
-	 */
-	@Override
-	public abstract CompletableFuture<Void> runAsync();
+	private final String name;
+	private final int maxTicks;
+	private final long yieldTime;
+
+	public ThreadProfile(final String name, int maxTicks, long yieldTime)
+	{
+		this.name = name;
+		this.maxTicks = maxTicks;
+		this.yieldTime = yieldTime;
+	}
+
+	public String name()
+	{
+		return this.name;
+	}
+
+	public int maxTicks()
+	{
+		return this.maxTicks;
+	}
+
+	public long yieldTime()
+	{
+		return this.yieldTime;
+	}
 }

@@ -24,7 +24,11 @@ import java.util.ConcurrentModificationException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
+import com.sakuraryoko.corelib.api.thread.ThreadExecutorPair;
+import com.sakuraryoko.corelib.api.thread.ThreadProfile;
+import com.sakuraryoko.corelib.api.thread.ThreadProfiles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 
@@ -40,47 +44,73 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 	public static CoreNetworkThreadHandler getInstance() { return INSTANCE; }
 
 	private static final int MAX_PLATFORM_THREADS = 1;
-	private boolean useVirtual = false;
-	private final String namePrefix = "CoreNetworkThreadHandler Worker Thread";
 	private static final float TASK_INTERVAL = 15.0F;
-	private final int threadCount = this.calculateMaxThreads();
-	private final ConcurrentHashMap<String, Thread> threadMap = this.builder();
+	private boolean useVirtual = false;
+	private final String namePrefix = "CoreNetwork Worker Thread";
+	private final int threadCount;
+	private final ConcurrentHashMap<String, ThreadExecutorPair<CoreNetworkThreadTask>> threadMap;
 	private final LinkedBlockingQueue<CoreNetworkThreadTask> queue;
+	private final ReentrantLock lock;
 	private long lastClientTick;
 	private long lastServerTick;
 
-	private int calculateMaxThreads()
+	private int calculateDefaultSafeThreadCount()
 	{
 		final int result = this.getThreadCountSafe();
-		if (result < 1) { this.useVirtual = true; }
-
+		this.useVirtual = result < 1;
 		return MathUtils.clamp(result, 1, MAX_PLATFORM_THREADS);
-	}
-
-	private ConcurrentHashMap<String, Thread> builder()
-	{
-		ConcurrentHashMap<String, Thread> threads = new ConcurrentHashMap<>(this.threadCount, 0.9f, 1);
-
-		for (int i = 0; i < this.threadCount; i++)
-		{
-			final String name = this.threadCount > 1 ? this.namePrefix+" "+ (i+1) : this.namePrefix;
-			threads.put(name, this.threadFactory(name, this.useVirtual, new CoreNetworkThreadExecutor()));
-		}
-
-		return threads;
 	}
 
 	private CoreNetworkThreadHandler()
 	{
+		this.threadCount = MAX_PLATFORM_THREADS;
+		this.threadMap = new ConcurrentHashMap<>(this.threadCount, 0.9f, 1);
 		this.queue = new LinkedBlockingQueue<>();
+		this.lock = new ReentrantLock();
 		this.lastClientTick = System.currentTimeMillis();
 		this.lastServerTick = System.currentTimeMillis();
+	//		this.buildThreadMap();
+	}
+
+	private synchronized void buildThreadMap()
+	{
+		// Only build when empty
+		if (this.threadMap.isEmpty())
+		{
+			this.lock.lock();
+
+			try
+			{
+				final int count = this.getClampedThreadCount(this.threadCount);
+
+				for (int i = 0; i < count; i++)
+				{
+					final String name = count > 1 ? this.namePrefix + " " + (i + 1) : this.namePrefix;
+					this.threadMap.put(name, this.threadFactory(name, this.useVirtual, new CoreNetworkThreadExecutor()));
+				}
+			}
+			finally
+			{
+				this.lock.unlock();
+			}
+		}
 	}
 
 	@Override
 	public String getName()
 	{
 		return this.namePrefix;
+	}
+
+	@Override
+	public ThreadProfile getProfile()
+	{
+		return ThreadProfiles.MIN.profile();
+	}
+
+	private int getClampedThreadCount(final int count)
+	{
+		return MathUtils.clamp(count, 1, MAX_PLATFORM_THREADS);
 	}
 
 	@Override
@@ -93,9 +123,11 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 
 			for (String key : keys)
 			{
+				ThreadExecutorPair<CoreNetworkThreadTask> pair = this.threadMap.get(key);
+
 				try
 				{
-					this.safeStart(this.threadMap.get(key));
+					this.safeStart(pair);
 				}
 				catch (ConcurrentModificationException cme)
 				{
@@ -103,13 +135,22 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 				}
 				catch (IllegalStateException is)
 				{
-					// Terminated
-					Thread entry = this.threadFactory(key, this.useVirtual, new CoreNetworkThreadExecutor());
-					entry.start();
+					this.lock.lock();
 
-					synchronized (this.threadMap)
+					try
 					{
-						this.threadMap.replace(key, entry);
+						// Terminated
+						pair = this.threadFactory(key, this.useVirtual, new CoreNetworkThreadExecutor());
+						pair.thread().start();
+
+						synchronized (this.threadMap)
+						{
+							this.threadMap.replace(key, pair);
+						}
+					}
+					finally
+					{
+						this.lock.unlock();
 					}
 				}
 				catch (RuntimeException re)
@@ -131,9 +172,11 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 
 			for (String key : keys)
 			{
+				ThreadExecutorPair<CoreNetworkThreadTask> pair = this.threadMap.get(key);
+
 				try
 				{
-					this.safeStop(this.threadMap.get(key));
+					this.safeStop(pair);
 				}
 				catch (ConcurrentModificationException cme)
 				{
@@ -156,7 +199,7 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 	@Override
 	public void reset()
 	{
-		this.queue.clear();
+		this.clearTasks();
 	}
 
 	@Override
@@ -164,10 +207,11 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 	{
 		if (Reference.EXPERIMENTAL)
 		{
-			final boolean wasEmpty = this.queue.isEmpty();
+			final boolean empty = this.getTaskCount() == 0;
+
 			this.queue.offer(task);
 
-			if (wasEmpty)
+			if (empty)
 			{
 				this.ensureThreadsAreAlive();
 			}
@@ -185,7 +229,7 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 		return null;
 	}
 
-	protected int getTaskCount()
+	public int getTaskCount()
 	{
 		return this.queue.size();
 	}
@@ -244,24 +288,40 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 
 			for (String key : keySet)
 			{
+				ThreadExecutorPair<CoreNetworkThreadTask> pair = this.threadMap.get(key);
+
 				try
 				{
-					this.safeStart(this.threadMap.get(key));
+					this.safeStart(pair);
 				}
 				catch (IllegalStateException is)
 				{
-					// Terminated (Replace)
-					Thread entry = this.threadFactory(key, this.useVirtual, new CoreNetworkThreadExecutor());
-					entry.start();
+					this.lock.lock();
 
-					synchronized (this.threadMap)
+					try
 					{
-						this.threadMap.replace(key, entry);
+						// Terminated (Replace)
+						pair = this.threadFactory(key, this.useVirtual, new CoreNetworkThreadExecutor());
+						pair.thread().start();
+
+						synchronized (this.threadMap)
+						{
+							this.threadMap.replace(key, pair);
+						}
+					}
+					finally
+					{
+						this.lock.unlock();
 					}
 				}
 				catch (RuntimeException ignored) {}
 			}
 		}
+	}
+
+	public void clearTasks()
+	{
+		this.queue.clear();
 	}
 
 	@Override
