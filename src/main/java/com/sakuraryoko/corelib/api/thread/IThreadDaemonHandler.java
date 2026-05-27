@@ -46,7 +46,7 @@ public interface IThreadDaemonHandler<T extends IThreadTaskBase> extends AutoClo
 	default int getThreadCountSafe()
 	{
 		final int maxThreads = Runtime.getRuntime().availableProcessors();
-		final Fraction calc = Fraction.getFraction(maxThreads, 4);
+		final Fraction calc = Fraction.getFraction(maxThreads, 8);
 		return MathUtils.clamp(calc.intValue(), 0, maxThreads);
 	}
 
@@ -56,7 +56,7 @@ public interface IThreadDaemonHandler<T extends IThreadTaskBase> extends AutoClo
 	 */
 	default int getThreadCountMax()
 	{
-		return MathUtils.max(Runtime.getRuntime().availableProcessors() / 2, 1);
+		return MathUtils.max(Runtime.getRuntime().availableProcessors() / 4, 1);
 	}
 
 	default ThreadProfile getProfile()

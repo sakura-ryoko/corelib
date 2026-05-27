@@ -89,13 +89,11 @@ public class i18nConfig implements StringRepresentable
 		return this.manager.getLang();
 	}
 
-//	@Override
 	public String getStringValue()
 	{
 		return this.selectedOption.getKey();
 	}
 
-//	@Override
 	public String getDisplayName()
 	{
 		return this.selectedOption.getTranslatedName();
@@ -107,7 +105,6 @@ public class i18nConfig implements StringRepresentable
 		return this.getStringValue();
 	}
 
-//	@Override
 	public i18nConfig cycle(boolean forward)
 	{
 		int id = this.selectedIndex;
@@ -135,7 +132,6 @@ public class i18nConfig implements StringRepresentable
 		return this;
 	}
 
-//	@Override
 	public i18nConfig fromString(String value)
 	{
 		this.selectedOption = i18nOption.fromString(value);

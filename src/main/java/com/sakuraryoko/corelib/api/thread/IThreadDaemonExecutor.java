@@ -156,6 +156,15 @@ public interface IThreadDaemonExecutor<T extends IThreadTaskBase> extends Runnab
 			{
 				this.interrupt(e);
 			}
+			finally
+			{
+				if (this.isPaused())
+				{
+					// This is required to avoid spin-lock.
+					CoreLib.debugLog("IThreadDaemonExecutor#Executor: sleep ended: for '{}'", this.currentThreadName());
+					this.resume();
+				}
+			}
 		}
 	}
 }

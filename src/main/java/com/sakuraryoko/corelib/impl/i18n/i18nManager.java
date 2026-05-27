@@ -20,21 +20,25 @@
 
 package com.sakuraryoko.corelib.impl.i18n;
 
-import com.sakuraryoko.corelib.api.i18n.i18nConfig;
-import com.sakuraryoko.corelib.api.i18n.i18nOption;
-import com.sakuraryoko.corelib.impl.CoreLib;
-import com.sakuraryoko.corelib.impl.Reference;
-import com.sakuraryoko.corelib.impl.text.BuiltinTextHandler;
-import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.ApiStatus;
-
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
+import org.jetbrains.annotations.ApiStatus;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+
+import com.sakuraryoko.corelib.api.i18n.i18nConfig;
+import com.sakuraryoko.corelib.api.i18n.i18nOption;
+import com.sakuraryoko.corelib.impl.CoreLib;
+import com.sakuraryoko.corelib.impl.Reference;
+import com.sakuraryoko.corelib.impl.text.BuiltinTextHandler;
 
 public class i18nManager
 {
@@ -185,6 +189,27 @@ public class i18nManager
 		return this.baseString;
 	}
 
+	public String getMinecraftLanguage()
+	{
+		//#if MC >= 1.19.4
+		//$$ return Minecraft.getInstance().getLanguageManager().getSelected();
+		//#else
+		return Minecraft.getInstance().getLanguageManager().getSelected().getCode();
+		//#endif
+	}
+
+	public String getLangCode()
+	{
+		this.ensureLang();
+		return this.lang.getLangCode();
+	}
+
+	public boolean isVanillaLanguage()
+	{
+		this.ensureLang();
+		return this.lang.getLangCode().equalsIgnoreCase(this.getMinecraftLanguage());
+	}
+
 	public i18nLang getDefaultLang()
 	{
 		return this.defaultLang;
@@ -201,9 +226,19 @@ public class i18nManager
 		this.lang = this.defaultLang;
 	}
 
+	public void setLangAsVanilla()
+	{
+		this.setLang(this.getMinecraftLanguage());
+	}
+
 	public void setLang(i18nConfig config)
 	{
-		if (this.lang != null && Objects.equals(this.lang.getLangCode(), config.getStringValue()))
+		this.setLang(config.getStringValue());
+	}
+
+	public void setLang(String langCode)
+	{
+		if (this.lang != null && Objects.equals(this.lang.getLangCode(), langCode))
 		{
 			// Already matches
 			return;
@@ -214,14 +249,19 @@ public class i18nManager
 
 		try
 		{
-			this.lang = i18nLang.load(this.baseString, config.getStringValue());
-			CoreLib.LOGGER.info("i18nOptionManager#setLang({}): Language: '{}' [{}] - has been loaded successfully.", this.getModId(), config.getStringValue(), config.getDisplayName());
+			this.lang = i18nLang.load(this.baseString, langCode);
+			CoreLib.LOGGER.info("i18nOptionManager#setLang({}): Language: '{}' - has been loaded successfully.", this.getModId(), langCode);
 		}
 		catch (IOException e)
 		{
 			this.ensureLang();
-			CoreLib.LOGGER.error("i18nOptionManager#setLang({}): Exception loading language: '{}'; {}", this.getModId(), config.getStringValue(), e.getLocalizedMessage());
+			CoreLib.LOGGER.error("i18nOptionManager#setLang({}): Exception loading language: '{}'; {}", this.getModId(), langCode, e.getLocalizedMessage());
 		}
+	}
+
+	public List<String> getLanguageKeys()
+	{
+		return this.keys;
 	}
 
 	public List<i18nOption> getLanguageOptions()
@@ -276,7 +316,27 @@ public class i18nManager
 	public Component translateAsText(String key, Object... args)
 	{
 		this.ensureLang();
-		return BuiltinTextHandler.getInstance().of(this.translate(key, args));
+
+		if (this.hasTranslation(key))
+		{
+			return BuiltinTextHandler.getInstance().of(this.translate(key, args));
+		}
+		else
+		{
+			return BuiltinTextHandler.getInstance().of(this.translate(key, args))
+								 //#if MC >= 1.16.5
+			                         //$$ .plainCopy().withStyle((style) ->
+								 //#else
+			                         .withStyle((style) ->
+								 //#endif
+					                         style.setColor(ChatFormatting.RED)
+							                         .setHoverEvent(
+//#if MC >= 1.21.5
+    //$$ new HoverEvent.ShowText(BuiltinTextHandler.getInstance().of("Missing translation: " + key))));
+//#else
+    new HoverEvent(HoverEvent.Action.SHOW_TEXT, BuiltinTextHandler.getInstance().of("Missing translation: " + key))));
+//#endif
+		}
 	}
 
 	// matches 'en_us.json'; for example.
