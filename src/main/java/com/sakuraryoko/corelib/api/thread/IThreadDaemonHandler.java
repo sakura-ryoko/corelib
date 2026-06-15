@@ -59,11 +59,6 @@ public interface IThreadDaemonHandler<T extends IThreadTaskBase> extends AutoClo
 		return MathUtils.max(Runtime.getRuntime().availableProcessors() / 4, 1);
 	}
 
-	default ThreadProfile getProfile()
-	{
-		return ThreadProfiles.DEFAULT.profile();
-	}
-
 	/**
 	 * Default wrapper around building a new {@link ThreadExecutorPair}
 	 * @param name The name of the new {@link Thread}
@@ -128,12 +123,14 @@ public interface IThreadDaemonHandler<T extends IThreadTaskBase> extends AutoClo
 			case NEW: throw new IllegalThreadStateException();
 			case BLOCKED: throw new ConcurrentModificationException();
 			case TERMINATED: throw new IllegalStateException();
+			case TIMED_WAITING: t.thread().interrupt();
+			case WAITING: t.thread().interrupt();
 			default:
 			{
 				//#if MC >= 1.20.6
 				//$$ try
 				//$$ {
-					//$$ if (t.thread().join(Duration.ofDays(50L)))
+					//$$ if (t.thread().join(Duration.ofMillis(50L)))
 					//$$ {
 						//$$ this.safeStop(t);
 					//$$ }
@@ -201,6 +198,26 @@ public interface IThreadDaemonHandler<T extends IThreadTaskBase> extends AutoClo
 	boolean hasTasks();
 
 	/**
+	 * Return whether the {@link Thread} should sleep.
+	 * @return -
+	 */
+	default boolean shouldPause()
+	{
+		return !this.hasTasks();
+	}
+
+	/**
+	 * Reset whether the {@link Thread} should stop forcibly.
+	 */
+	default void resetForceStop() {}
+
+	/**
+	 * Return whether the {@link Thread} should stop forcibly.
+	 * @return -
+	 */
+	default boolean isForceStop() { return false; }
+
+	/**
 	 * End Task Execution
 	 */
 	default void endAll()
@@ -208,5 +225,15 @@ public interface IThreadDaemonHandler<T extends IThreadTaskBase> extends AutoClo
 		CoreLib.debugLog("IThreadDaemonHandler#endAll()");
 		this.reset();
 		this.stop();
+	}
+
+	/**
+	 * Force a JVM Garbage Collection.
+	 * This may be useful for high-resource utilization of the {@link Thread}
+	 */
+	default void gc()
+	{
+		CoreLib.debugLog("IThreadDaemonHandler#gc(): Executing Garbage collection");
+		System.gc();
 	}
 }

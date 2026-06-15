@@ -21,6 +21,10 @@
 package com.sakuraryoko.corelib.impl.mixin.server;
 
 import net.minecraft.client.server.IntegratedServer;
+//#if MC >= 26.2
+//$$ import net.minecraft.server.MinecraftServer;
+//$$ import org.spongepowered.asm.mixin.Shadow;
+//#endif
 import net.minecraft.world.level.GameType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,6 +39,10 @@ import com.sakuraryoko.corelib.impl.network.NetworkServiceManager;
 @Mixin(IntegratedServer.class)
 public class MixinIntegratedServer
 {
+    //#if MC >= 26.2
+    //$$ @Shadow private GameType gameTypeForOtherPlayers;
+    //#endif
+
     @Inject(method = "initServer", at = @At("RETURN"))
     private void corelib$onInitServer(CallbackInfoReturnable<Boolean> cir)
     {
@@ -50,13 +58,24 @@ public class MixinIntegratedServer
         }
     }
 
+    //#if MC >= 26.2
+    //$$ @Inject(method = "publishServer(Lnet/minecraft/server/MinecraftServer$MultiplayerScope;I)Z", at = @At("RETURN"))
+    //$$ private void corelib$onPublishServer(MinecraftServer.MultiplayerScope scope, int port,
+                                             //$$ CallbackInfoReturnable<Boolean> cir)
+    //$$ {
+        //$$ if (cir.getReturnValue())
+        //$$ {
+            //$$ ((ModInitManager) ModInitManager.getInstance()).setOpenToLan(true);
+            //$$ ((ServerEventsManager) ServerEventsManager.getInstance()).onOpenToLanInternal((IntegratedServer) (Object) this, this.gameTypeForOtherPlayers);
+    //#else
     @Inject(method = "publishServer", at = @At("RETURN"))
-    private void corelib$onPublishServer(GameType gameType, boolean bl, int i, CallbackInfoReturnable<Boolean> cir)
+    private void corelib$onPublishServer(GameType gameType, boolean allowCommands, int port, CallbackInfoReturnable<Boolean> cir)
     {
         if (cir.getReturnValue())
         {
             ((ModInitManager) ModInitManager.getInstance()).setOpenToLan(true);
             ((ServerEventsManager) ServerEventsManager.getInstance()).onOpenToLanInternal((IntegratedServer) (Object) this, gameType);
+    //#endif
 
             if (Reference.EXPERIMENTAL && !NetworkServiceManager.getInstance().isServerStarted())
             {

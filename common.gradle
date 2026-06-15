@@ -114,6 +114,8 @@ if (mcVersion >= 260000) {
 JavaVersion MIXIN_COMPATIBILITY_LEVEL = JAVA_COMPATIBILITY
 
 loom {
+	accessWidenerPath = file("src/main/resources/corelib.accesswidener")
+
 	// '--sun-misc-unsafe-memory-access=allow','--enable-native-access=ALL-UNNAMED'
 	def commonVmArgs = ['-Dmixin.debug.export=true','-Dmixin.debug.countInjections=true']
 	runConfigs.configureEach {
@@ -136,8 +138,6 @@ loom {
 //            ideConfigGenerated false
 //        }
 //	}
-
-	accessWidenerPath = file("src/main/resources/corelib.accesswidener")
 }
 
 String modVersionSuffix = ''

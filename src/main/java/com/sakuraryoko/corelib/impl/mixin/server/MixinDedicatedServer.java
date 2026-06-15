@@ -28,16 +28,20 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 //#endif
 import com.mojang.datafixers.DataFixer;
-//#if MC >= 11902
+//#if MC >= 26.2
+//$$ import net.minecraft.server.jsonrpc.ManagementServer;
+//$$ import net.minecraft.server.notifications.NotificationManager;
+//#endif
+//#if MC >= 1.19.2
 //$$ import net.minecraft.server.Services;
 //$$ import net.minecraft.server.WorldStem;
 //$$ import net.minecraft.server.packs.repository.PackRepository;
 //$$ import net.minecraft.world.level.storage.LevelStorageSource;
-//#elseif MC >= 11802
+//#elseif MC >= 1.18.2
 //$$ import net.minecraft.server.WorldStem;
 //$$ import net.minecraft.server.packs.repository.PackRepository;
 //$$ import net.minecraft.world.level.storage.LevelStorageSource;
-//#elseif MC >= 11605
+//#elseif MC >= 1.16.5
 //$$ import net.minecraft.core.RegistryAccess;
 //$$ import net.minecraft.server.packs.repository.PackRepository;
 //$$ import net.minecraft.server.ServerResources;
@@ -49,7 +53,7 @@ import java.io.File;
 //#endif
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
-//#if MC >= 12110
+//#if MC >= 1.21.10
 //#else
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 //#endif
@@ -71,27 +75,32 @@ import com.sakuraryoko.corelib.impl.network.NetworkServiceManager;
 public class MixinDedicatedServer
 {
     @Inject(method = "<init>", at = @At("RETURN"))
-//#if MC >= 26.1
+//#if MC >= 26.2
+    //$$ private void corelib$onDedicatedServer(Thread serverThread, LevelStorageSource.LevelStorageAccess levelStorageSource, PackRepository packRepository,
+                                                //$$ WorldStem worldStem, Optional<GameRules> gameRules, DedicatedServerSettings settings, DataFixer fixerUpper,
+                                                //$$ Services services, ManagementServer jsonRpcServer, NotificationManager notificationManager,
+                                                //$$ CallbackInfo ci)
+//#elseif MC >= 26.1
     //$$ private void corelib$onDedicatedServer(Thread serverThread, LevelStorageSource.LevelStorageAccess levelStorageSource, PackRepository packRepository,
                                                 //$$ WorldStem worldStem, Optional<GameRules> gameRules, DedicatedServerSettings settings, DataFixer fixerUpper,
                                                 //$$ Services services, CallbackInfo ci)
-//#elseif MC >= 12110
+//#elseif MC >= 1.21.10
     //$$ private void corelib$onDedicatedServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository,
 												//$$ WorldStem worldStem, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
 											    //$$ Services services, CallbackInfo ci)
-//#elseif MC >= 11902
+//#elseif MC >= 1.19.2
     //$$ private void corelib$onDedicatedServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess,
 												//$$ PackRepository packRepository, WorldStem worldStem,
 												//$$ DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
 												//$$ Services services, ChunkProgressListenerFactory chunkProgressListenerFactory,
 												//$$ CallbackInfo ci)
-//#elseif MC >= 11802
+//#elseif MC >= 1.18.2
     //$$ private void corelib$onDedicatedServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository,
 												//$$ WorldStem worldStem, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,
 												//$$ MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository,
 												//$$ GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory,
 												//$$ CallbackInfo ci)
-//#elseif MC >= 11605
+//#elseif MC >= 1.16.5
     //$$ private void corelib$onDedicatedServer(Thread thread, RegistryAccess.RegistryHolder registryHolder, LevelStorageSource.LevelStorageAccess levelStorageAccess,
 												//$$ PackRepository packRepository, ServerResources serverResources, WorldData worldData,
 												//$$ DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer,

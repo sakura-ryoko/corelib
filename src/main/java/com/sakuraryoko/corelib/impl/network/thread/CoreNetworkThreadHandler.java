@@ -27,8 +27,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.sakuraryoko.corelib.api.thread.ThreadExecutorPair;
-import com.sakuraryoko.corelib.api.thread.ThreadProfile;
-import com.sakuraryoko.corelib.api.thread.ThreadProfiles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 
@@ -53,6 +51,7 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 	private final ReentrantLock lock;
 	private long lastClientTick;
 	private long lastServerTick;
+	private boolean forceStop = false;
 
 	private int calculateDefaultSafeThreadCount()
 	{
@@ -100,12 +99,6 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 	public String getName()
 	{
 		return this.namePrefix;
-	}
-
-	@Override
-	public ThreadProfile getProfile()
-	{
-		return ThreadProfiles.MIN.profile();
 	}
 
 	private int getClampedThreadCount(final int count)
@@ -319,9 +312,29 @@ public class CoreNetworkThreadHandler implements IThreadDaemonHandler<CoreNetwor
 		}
 	}
 
+	@Override
+	public void resetForceStop()
+	{
+		this.forceStop = false;
+	}
+
+	@Override
+	public boolean isForceStop()
+	{
+		return this.forceStop;
+	}
+
 	public void clearTasks()
 	{
 		this.queue.clear();
+	}
+
+	@Override
+	public void endAll()
+	{
+		this.forceStop = true;
+		this.reset();
+		this.stop();
 	}
 
 	@Override

@@ -32,7 +32,7 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	private final AtomicBoolean paused = new AtomicBoolean(false);
 	private final long sleepTime;
 	private final float sleepDelay;
-	private long maxTicks;
+	private final long maxTicks;
 	private long lastTaskTime;
 	private long ticks;
 
@@ -45,7 +45,7 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	{
 		this.sleepTime = MathUtils.clamp(sleepTime, 60000L, Long.MAX_VALUE); // 1 min
 		this.sleepDelay = 0.75F;     // <1-second sleep delay (Must be 1/2 tick rate)
-		this.maxTicks = 8L;          // Cap how many ticks per an interrupt cycle without tasks to do
+		this.maxTicks = 32L;         // Cap how many ticks per an interrupt cycle without tasks to do
 		this.ticks = 0L;
 	}
 
@@ -64,6 +64,12 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	@Override
 	public void start()
 	{
+		if (CoreNetworkThreadHandler.getInstance().isForceStop())
+		{
+			this.stop();
+			return;
+		}
+
 		if (!this.isRunning())
 		{
 			NetworkServiceManager.LOGGER.info("Executor: Starting");
@@ -79,9 +85,10 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	@Override
 	public void interrupt(InterruptedException interrupt)
 	{
-		NetworkServiceManager.LOGGER.info("Executor: Interrupt Signal: {}", interrupt.getLocalizedMessage() != null
-		                                                   ? interrupt.getLocalizedMessage()  // This is null sometimes?
-		                                                   : "received interrupt signal");
+		NetworkServiceManager.LOGGER.info("Executor: Interrupt Signal: {}",
+										  interrupt.getLocalizedMessage() != null
+										  ? interrupt.getLocalizedMessage()  // This is null sometimes?
+										  : "received interrupt signal");
 		if (this.isPaused() || !this.isRunning())
 		{
 			this.resume();
@@ -104,7 +111,7 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 			this.paused.set(false);
 		}
 
-//		this.start();
+		this.start();
 	}
 
 	@Override
@@ -142,12 +149,15 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	@Override
 	public void run()
 	{
-		NetworkServiceManager.LOGGER.info("CoreNetworkThreadExecutor: begin");
-
 		if (!this.isCorrectThread()) { return; }
 
+		if (CoreNetworkThreadHandler.getInstance().isForceStop())
+		{
+			this.stop();
+			return;
+		}
+
 		this.running.set(true);
-		this.maxTicks = CoreNetworkThreadHandler.getInstance().getProfile().maxTicks();
 		this.lastTaskTime = System.currentTimeMillis();
 		this.ticks = 0L;
 		NetworkServiceManager.LOGGER.info("Executor: Running: [{}/{}]", this.isRunning(), this.isPaused());
@@ -162,15 +172,14 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 			{
 				this.paused.set(true);
 				this.ticks = 0L;
+				this.sleep();
+				// calls this.resume() when sleep is interrupt() or times out.
+			}
 
-				if (this.hasTasks())
-				{
-					this.sleep(CoreNetworkThreadHandler.getInstance().getProfile().yieldTime());
-				}
-				else
-				{
-					this.sleep();
-				}
+			if (CoreNetworkThreadHandler.getInstance().isForceStop())
+			{
+				this.stop();
+				return;
 			}
 		}
 	}
@@ -205,8 +214,8 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	@Override
 	public boolean shouldPause()
 	{
-		if (this.ticks > this.maxTicks) { return true; }
 		if (this.hasTasks()) { return false; }
+		if (this.ticks > this.maxTicks) { return true; }
 		return (System.currentTimeMillis() - this.lastTaskTime) > (this.sleepDelay * 1000L);
 	}
 
@@ -218,7 +227,7 @@ public class CoreNetworkThreadExecutor implements IThreadDaemonExecutor<CoreNetw
 	@Override
 	public void processTask(CoreNetworkThreadTask task) throws InterruptedException
 	{
-		NetworkServiceManager.LOGGER.info("CoreNetworkThreadExecutor: processTask()");
 		task.run();
+		NetworkServiceManager.LOGGER.info("CoreNetworkThreadExecutor: processTask(): Completed");
 	}
 }
