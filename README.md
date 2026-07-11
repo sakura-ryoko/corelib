@@ -15,10 +15,16 @@
 - Client / Player / Server Events
 - Server commands interface
 - Thread management interface
-- Networking interface
+- Networking interface (WIP-but works)
 - Text formatting using a standard utility
 - Time/Date & Duration formatting utility
 - i18n translation manager utility
 - CSV File management (csvtool)
+
+### Using
+* Maven: https://maven.sakuraryoko.com/com/sakuraryoko/corelib/
+* Format: `corelib_version`-mc`minecraft_version`
+* Start coding your Mod Init Dispatcher, and Config Dispatcher.
+* Examples can be found under corelib's own source code.
 
 [![Join Sakura's RyokoCraft Discord](https://sakuraryoko.com/files/1398873/discord-300px.png)](https://discord.gg/ryokocraftmc)
