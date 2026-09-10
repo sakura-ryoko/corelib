@@ -30,7 +30,7 @@ public class Reference
 {
 	public static final Path GAME_DIR = FabricReference.GAME_DIR;
     public static final Path CONFIG_DIR = FabricReference.CONFIG_DIR;
-    public static final String MOD_ID = "corelib";
+    public static final String MOD_ID = "core-lib-api";
 	//#if MC >= 12106
 	//$$ public static final String MC_VERSION = SharedConstants.getCurrentVersion().name();
 	//#else
