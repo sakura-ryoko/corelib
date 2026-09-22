@@ -15,7 +15,7 @@
   },
   "license": "LGPL-3.0",
 
-  "icon": "assets/corelib/icon.png",
+  "icon": "assets/core-lib-api/icon.png",
 
   "environment": "*",
   "entrypoints": {
