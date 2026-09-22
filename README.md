@@ -23,8 +23,8 @@
 - CSV File management (csvtool)
 
 ### Using
-* Maven: https://maven.sakuraryoko.com/com/sakuraryoko/corelib/
-* Format: `corelib_version`-mc`minecraft_version`
+* Maven: https://maven.sakuraryoko.com/com/sakuraryoko/core-lib-api/
+* Format: `core_lib_version`-mc`minecraft_version`
 * Start coding your Mod Init Dispatcher, and Config Dispatcher.
 * Examples can be found under CoreLib's own source code.
 
